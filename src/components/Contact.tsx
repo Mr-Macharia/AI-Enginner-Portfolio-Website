@@ -1,5 +1,11 @@
 import { useState, type FormEvent } from 'react';
+import emailjs from '@emailjs/browser';
 import ScrollReveal from './ScrollReveal';
+
+const SERVICE_ID   = import.meta.env.VITE_EMAILJS_SERVICE_ID;
+const TEMPLATE_ID  = import.meta.env.VITE_EMAILJS_TEMPLATE_ID;
+const AUTOREPLY_ID = import.meta.env.VITE_EMAILJS_AUTOREPLY_TEMPLATE_ID;
+const PUBLIC_KEY   = import.meta.env.VITE_EMAILJS_PUBLIC_KEY;
 
 const Contact = () => {
   const [formData, setFormData] = useState({
@@ -10,19 +16,35 @@ const Contact = () => {
   });
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [submitStatus, setSubmitStatus] = useState<'idle' | 'success' | 'error'>('idle');
+  const [errorMsg, setErrorMsg] = useState('');
 
   const handleSubmit = async (e: FormEvent) => {
     e.preventDefault();
     setIsSubmitting(true);
-    
-    // Simulate form submission
-    await new Promise(resolve => setTimeout(resolve, 1000));
-    
-    setIsSubmitting(false);
-    setSubmitStatus('success');
-    setFormData({ name: '', email: '', subject: '', message: '' });
-    
-    setTimeout(() => setSubmitStatus('idle'), 3000);
+
+    const templateParams = {
+      from_name:  formData.name,
+      from_email: formData.email,
+      subject:    formData.subject,
+      message:    formData.message,
+    };
+
+    try {
+      await emailjs.send(SERVICE_ID, TEMPLATE_ID,  templateParams, PUBLIC_KEY);
+      await emailjs.send(SERVICE_ID, AUTOREPLY_ID, templateParams, PUBLIC_KEY);
+      setSubmitStatus('success');
+      setErrorMsg('');
+      setFormData({ name: '', email: '', subject: '', message: '' });
+    } catch (err: unknown) {
+      const message = err instanceof Error ? err.message
+        : (err as { text?: string })?.text ?? JSON.stringify(err);
+      console.error('EmailJS error:', err);
+      setErrorMsg(message);
+      setSubmitStatus('error');
+    } finally {
+      setIsSubmitting(false);
+      setTimeout(() => setSubmitStatus('idle'), 4000);
+    }
   };
 
   const services = [
@@ -58,7 +80,9 @@ const Contact = () => {
               </div>
               <div className="contact-details">
                 <h4>Email</h4>
-                <a href="mailto:gichogumacharia001@gmail.com">gichogumacharia001@gmail.com</a>
+                <span style={{ color: 'var(--text-secondary)', fontSize: '0.9rem' }}>
+                  Use the contact form →
+                </span>
               </div>
             </div>
             <div className="contact-card glass-card">
@@ -171,14 +195,24 @@ const Contact = () => {
               />
             </div>
             <button type="submit" className="btn btn-primary btn-full" disabled={isSubmitting}>
-              <span>{isSubmitting ? 'Sending...' : submitStatus === 'success' ? 'Message Sent!' : 'Send Message'}</span>
-              {!isSubmitting && submitStatus !== 'success' && (
+              <span>
+                {isSubmitting ? 'Sending...'
+                  : submitStatus === 'success' ? '✓ Message Sent!'
+                  : submitStatus === 'error'   ? '✗ Failed — try again'
+                  : 'Send Message'}
+              </span>
+              {!isSubmitting && submitStatus === 'idle' && (
                 <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
                   <line x1="22" y1="2" x2="11" y2="13"/>
                   <polygon points="22 2 15 22 11 13 2 9 22 2"/>
                 </svg>
               )}
             </button>
+            {submitStatus === 'error' && errorMsg && (
+              <p style={{ color: '#ff6b6b', fontSize: '0.85rem', marginTop: '0.5rem' }}>
+                Error: {errorMsg}
+              </p>
+            )}
           </form>
           </ScrollReveal>
         </div>

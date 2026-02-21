@@ -104,8 +104,8 @@ const Navbar = ({ activeSection }: NavbarProps) => {
           {/* Hamburger toggle */}
           <button
             className={`nav-toggle ${isMenuOpen ? 'active' : ''}`}
-            onClick={() => setIsMenuOpen(true)}
-            aria-label="Open menu"
+            onClick={() => setIsMenuOpen(prev => !prev)}
+            aria-label={isMenuOpen ? 'Close menu' : 'Open menu'}
           >
             <span />
             <span />
