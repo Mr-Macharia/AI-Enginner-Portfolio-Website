@@ -1,0 +1,220 @@
+// Credit: component inspired by @BalintFerenczy on X
+// https://codepen.io/BalintFerenczy/pen/KwdoyEN
+import { useEffect, useRef, useCallback, useState, type CSSProperties, type ReactNode } from 'react';
+import './ElectricBorder.css';
+
+interface ElectricBorderProps {
+  children: ReactNode;
+  color?: string;
+  speed?: number;
+  chaos?: number;
+  borderRadius?: number;
+  className?: string;
+  style?: CSSProperties;
+}
+
+const ElectricBorder = ({
+  children,
+  color = '#e85d04',
+  speed = 1,
+  chaos = 0.12,
+  borderRadius = 20,
+  className,
+  style,
+}: ElectricBorderProps) => {
+  const canvasRef = useRef<HTMLCanvasElement>(null);
+  const containerRef = useRef<HTMLDivElement>(null);
+  const animationRef = useRef<number>(0);
+  const timeRef = useRef(0);
+  const lastFrameTimeRef = useRef(0);
+  const isHoveredRef = useRef(false);
+  const [hovered, setHovered] = useState(false);
+
+  const random = useCallback((x: number) => (Math.sin(x * 12.9898) * 43758.5453) % 1, []);
+
+  const noise2D = useCallback(
+    (x: number, y: number) => {
+      const i = Math.floor(x), j = Math.floor(y);
+      const fx = x - i, fy = y - j;
+      const a = random(i + j * 57), b = random(i + 1 + j * 57);
+      const c = random(i + (j + 1) * 57), d = random(i + 1 + (j + 1) * 57);
+      const ux = fx * fx * (3 - 2 * fx), uy = fy * fy * (3 - 2 * fy);
+      return a*(1-ux)*(1-uy) + b*ux*(1-uy) + c*(1-ux)*uy + d*ux*uy;
+    },
+    [random]
+  );
+
+  const octavedNoise = useCallback(
+    (x: number, octaves: number, lacunarity: number, gain: number,
+     baseAmplitude: number, baseFrequency: number, time: number,
+     seed: number, baseFlatness: number) => {
+      let y = 0, amplitude = baseAmplitude, frequency = baseFrequency;
+      for (let i = 0; i < octaves; i++) {
+        const oct = i === 0 ? amplitude * baseFlatness : amplitude;
+        y += oct * noise2D(frequency * x + seed * 100, time * frequency * 0.3);
+        frequency *= lacunarity;
+        amplitude *= gain;
+      }
+      return y;
+    },
+    [noise2D]
+  );
+
+  const getCornerPoint = useCallback(
+    (cx: number, cy: number, r: number, startAngle: number, arcLen: number, progress: number) => ({
+      x: cx + r * Math.cos(startAngle + progress * arcLen),
+      y: cy + r * Math.sin(startAngle + progress * arcLen),
+    }),
+    []
+  );
+
+  const getRoundedRectPoint = useCallback(
+    (t: number, left: number, top: number, width: number, height: number, radius: number) => {
+      const sw = width - 2 * radius, sh = height - 2 * radius;
+      const ca = (Math.PI * radius) / 2;
+      const total = 2 * sw + 2 * sh + 4 * ca;
+      let dist = t * total, acc = 0;
+
+      if (dist <= acc + sw) return { x: left + radius + (dist - acc) / sw * sw, y: top };
+      acc += sw;
+      if (dist <= acc + ca) return getCornerPoint(left+width-radius, top+radius, radius, -Math.PI/2, Math.PI/2, (dist-acc)/ca);
+      acc += ca;
+      if (dist <= acc + sh) return { x: left + width, y: top + radius + (dist - acc) / sh * sh };
+      acc += sh;
+      if (dist <= acc + ca) return getCornerPoint(left+width-radius, top+height-radius, radius, 0, Math.PI/2, (dist-acc)/ca);
+      acc += ca;
+      if (dist <= acc + sw) return { x: left + width - radius - (dist - acc) / sw * sw, y: top + height };
+      acc += sw;
+      if (dist <= acc + ca) return getCornerPoint(left+radius, top+height-radius, radius, Math.PI/2, Math.PI/2, (dist-acc)/ca);
+      acc += ca;
+      if (dist <= acc + sh) return { x: left, y: top + height - radius - (dist - acc) / sh * sh };
+      acc += sh;
+      return getCornerPoint(left+radius, top+radius, radius, Math.PI, Math.PI/2, (dist-acc)/ca);
+    },
+    [getCornerPoint]
+  );
+
+  useEffect(() => {
+    const canvas = canvasRef.current, container = containerRef.current;
+    if (!canvas || !container) return;
+    const ctx = canvas.getContext('2d');
+    if (!ctx) return;
+
+    // Reduced octaves 10→5 for ~50% less math per frame
+    const octaves = 5, lacunarity = 1.6, gain = 0.7;
+    const displacement = 60, borderOffset = 60;
+
+    const updateSize = () => {
+      const rect = container.getBoundingClientRect();
+      const w = rect.width + borderOffset * 2, h = rect.height + borderOffset * 2;
+      const dpr = Math.min(window.devicePixelRatio || 1, 2);
+      canvas.width = w * dpr; canvas.height = h * dpr;
+      canvas.style.width = `${w}px`; canvas.style.height = `${h}px`;
+      ctx.scale(dpr, dpr);
+      return { width: w, height: h };
+    };
+
+    let { width, height } = updateSize();
+
+    const draw = (now: number) => {
+      // Stop loop immediately if mouse has left
+      if (!isHoveredRef.current) {
+        animationRef.current = 0;
+        return;
+      }
+      if (!canvas || !ctx) return;
+      const dt = (now - lastFrameTimeRef.current) / 1000;
+      timeRef.current += dt * speed;
+      lastFrameTimeRef.current = now;
+
+      const dpr = Math.min(window.devicePixelRatio || 1, 2);
+      ctx.setTransform(1, 0, 0, 1, 0, 0);
+      ctx.clearRect(0, 0, canvas.width, canvas.height);
+      ctx.scale(dpr, dpr);
+
+      ctx.strokeStyle = color;
+      ctx.lineWidth = 1.5;
+      ctx.lineCap = 'round';
+      ctx.lineJoin = 'round';
+
+      const left = borderOffset, top = borderOffset;
+      const bw = width - 2 * borderOffset, bh = height - 2 * borderOffset;
+      const maxR = Math.min(bw, bh) / 2;
+      const r = Math.min(borderRadius, maxR);
+      const approxPerim = 2 * (bw + bh) + 2 * Math.PI * r;
+      // Reduced sample density /2→/3 (imperceptible quality drop, ~33% less work)
+      const samples = Math.floor(approxPerim / 3);
+
+      ctx.beginPath();
+      for (let i = 0; i <= samples; i++) {
+        const p = i / samples;
+        const pt = getRoundedRectPoint(p, left, top, bw, bh, r);
+        const xn = octavedNoise(p*8, octaves, lacunarity, gain, chaos, 10, timeRef.current, 0, 0);
+        const yn = octavedNoise(p*8, octaves, lacunarity, gain, chaos, 10, timeRef.current, 1, 0);
+        const dx = pt.x + xn * displacement;
+        const dy = pt.y + yn * displacement;
+        i === 0 ? ctx.moveTo(dx, dy) : ctx.lineTo(dx, dy);
+      }
+      ctx.closePath();
+      ctx.stroke();
+      animationRef.current = requestAnimationFrame(draw);
+    };
+
+    const startAnimation = () => {
+      isHoveredRef.current = true;
+      setHovered(true);
+      // Only run canvas animation in dark mode
+      const isDarkMode = document.documentElement.classList.contains('dark');
+      if (isDarkMode && !animationRef.current) {
+        lastFrameTimeRef.current = performance.now();
+        animationRef.current = requestAnimationFrame(draw);
+      }
+    };
+
+    const stopAnimation = () => {
+      isHoveredRef.current = false;
+      setHovered(false);
+      // Clear canvas so no stale frame lingers
+      const dpr = Math.min(window.devicePixelRatio || 1, 2);
+      ctx.setTransform(1, 0, 0, 1, 0, 0);
+      ctx.clearRect(0, 0, canvas.width, canvas.height);
+      ctx.scale(dpr, dpr);
+    };
+
+    const ro = new ResizeObserver(() => {
+      const s = updateSize(); width = s.width; height = s.height;
+    });
+    ro.observe(container);
+
+    container.addEventListener('mouseenter', startAnimation);
+    container.addEventListener('mouseleave', stopAnimation);
+
+    return () => {
+      cancelAnimationFrame(animationRef.current);
+      animationRef.current = 0;
+      ro.disconnect();
+      container.removeEventListener('mouseenter', startAnimation);
+      container.removeEventListener('mouseleave', stopAnimation);
+    };
+  }, [color, speed, chaos, borderRadius, octavedNoise, getRoundedRectPoint]);
+
+  return (
+    <div
+      ref={containerRef}
+      className={`electric-border${className ? ` ${className}` : ''}`}
+      style={{ '--electric-border-color': color, borderRadius, ...style } as CSSProperties}
+    >
+      <div className="eb-canvas-container">
+        <canvas ref={canvasRef} className="eb-canvas" />
+      </div>
+      <div className="eb-layers" style={{ opacity: hovered ? 1 : 0, transition: 'opacity 0.35s ease' }}>
+        <div className="eb-glow-1" />
+        <div className="eb-glow-2" />
+        <div className="eb-background-glow" />
+      </div>
+      <div className="eb-content">{children}</div>
+    </div>
+  );
+};
+
+export default ElectricBorder;
