@@ -26,7 +26,7 @@ const About = () => {
   }, []);
 
   const animateCounters = () => {
-    const targets = { repos: 43, projects: 15, clients: 10, years: 2 };
+    const targets = { repos: 60, projects: 15, clients: 10, years: 2 };
     const duration = 2000;
     const steps = 60;
     const stepTime = duration / steps;

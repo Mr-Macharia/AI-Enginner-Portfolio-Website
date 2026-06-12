@@ -26,7 +26,7 @@ I believe in writing clean, maintainable code and creating systems that are not 
 
 - **Dual Background:** BSc Strategic Management (JKUAT, Second Upper-Class Honors) + Data Science (Moringa School)
 - **Advanced Training:** Udacity (Generative AI), One Dev Academy (AI & Automation Engineering), ALX Africa / Cyber Shujaa (Data and AI)
-- **Active Creator:** 43+ public repositories showcasing diverse projects from web applications to AI agents
+- **Active Creator:** 60+ public repositories showcasing diverse projects from web applications to AI agents
 - **Industry Experience:** Built AI agents, ML pipelines, e-commerce solutions, data dashboards, and intelligent automation platforms
 - **Based In:** Nairobi, Kenya | Remote-First Working Style
 
@@ -122,58 +122,133 @@ Collected, cleaned, and validated data from national and community field project
 
 ## Featured Projects
 
-### 1. **AI-Logo-Design-Agent**
+### 1. **WhatsApp AI Assistant**
+
+**WhatsApp Chatbot & Automation System**
+
+- **Tech Stack:** Python, Agno (formerly Phidata), FastAPI, WhatsApp API
+- **Description:** Production-ready AI assistant integrated with WhatsApp for automating customer interactions, scheduling tasks, and business workflows.
+- **Capabilities:**
+  - Automated lead capture, FAQ replies, and database logging
+  - Context-aware intent parsing and response generation
+  - Built using Agno's AgentOS to seamlessly manage database storage and workflow scheduling
+- **Repository:** [whatsapp-ai-assistant](https://github.com/Mr-Macharia/whatsapp-ai-assistant)
+
+### 2. **Resume Assistant AI**
+
+**Intelligent Resume Screening & Enhancement**
+
+- **Tech Stack:** Python, Agno (AgentOS), FastAPI, Vector Search
+- **Description:** Multi-agent hiring assistant built using Agno to screen, analyze, and optimize professional CVs, matching them against job descriptions.
+- **Capabilities:**
+  - Automated resume parsing and skills extraction
+  - Profile keyword and match score assessment
+  - Multi-agent collaboration to draft custom layout and experience recommendations
+- **Repository:** [resume_assistant_ai](https://github.com/Mr-Macharia/resume_assistant_ai)
+
+### 3. **AI Job Application Generator**
+
+**Autonomous CV & Cover Letter Generation**
+
+- **Tech Stack:** Python, CrewAI, LiteLLM, PDF Processing
+- **Description:** Autonomous multi-agent pipeline utilizing CrewAI and LiteLLM to compile tailored, ATS-optimized CVs and context-aware cover letters matching targeted job descriptions.
+- **Capabilities:**
+  - Extraction of job description requirements and key skills
+  - Custom drafting of context-aware cover letters matching user profile
+  - Formatting and generation of clean, professional PDFs
+- **Repository:** [application_generator](https://github.com/Mr-Macharia/application_generator)
+
+### 4. **AI Customer Research App**
+
+**Market Research & Sentiment Analysis Platform**
+
+- **Tech Stack:** Python, Agno, Data Analytics, Pydantic
+- **Description:** Advanced customer research system designed to perform in-depth analysis of target demographics, behavior patterns, and customer sentiments.
+- **Capabilities:**
+  - Demographic profiling and market research aggregation
+  - Sentiment analysis and keyword frequency charts
+  - Structured data schema modeling with Pydantic for clean report drafting
+- **Repository:** [Customer-Research-App](https://github.com/Mr-Macharia/Customer-Research-App)
+
+### 5. **AI-Logo-Design-Agent**
 
 **Multi-Agent AI System for Creative Services**
 
 - **Tech Stack:** Python, CrewAI, LLM integration
-- **Description:** Intelligent multi-agent system that automates the end-to-end logo design process from brand research to final design delivery
-- **Impact:** Reduces manual design workflow by up to 70% while maintaining quality and creative consistency
+- **Description:** Intelligent multi-agent system that automates the end-to-end logo design process from brand research to final design delivery.
+- **Impact:** Reduces manual design workflow by up to 70% while maintaining quality and creative consistency.
 - **Repository:** [AI-Logo-Design-Agent](https://github.com/Mr-Macharia/AI-Logo-Design-Agent)
 
-### 2. **AI-Admin-Assistant**
+### 6. **AI-Admin-Assistant**
 
 **E-Commerce Customer Service Automation**
 
 - **Tech Stack:** Python, CrewAI, LangChain, Gemini 2.5 Flash / OpenAI GPT-4o-mini
-- **Description:** Intelligent admin support system designed for e-commerce customer service teams
+- **Description:** Intelligent admin support system designed for e-commerce customer service teams.
 - **Features:**
   - Multi-turn customer interaction handling
   - Automated response generation with context awareness
   - Integration with business intelligence systems
-- **Use Case:** Reduces response time and improves customer satisfaction scores
 - **Repository:** [AI-Admin-Assistant](https://github.com/Mr-Macharia/AI-Admin-Assistant)
 
-### 3. **Truth-AI**
+### 7. **Truth-AI**
 
 **Intelligent Fact-Checking & Research Platform**
 
-- **Tech Stack:** Python, CrewAI, Google Gemini, Perplexity AI integration
-- **Description:** Advanced research agent that verifies facts and debunks myths using multiple AI sources
+- **Tech Stack:** Python, CrewAI, Google Gemini, Streamlit
+- **Description:** Advanced research agent with a Streamlit interface that verifies facts and debunks myths using multiple AI sources.
 - **Capabilities:**
   - Multi-source research and cross-verification
   - Credibility scoring for information
   - Comprehensive citation tracking
-- **Application:** Educational platforms, misinformation detection, research support
 - **Repository:** [Truth-AI](https://github.com/Mr-Macharia/--Truth-AI)
 
-### 4. **Emminence Realtors**
+### 8. **Tomato Leaf Disease Prediction**
+
+**Deep Learning Leaf Disease Classification**
+
+- **Tech Stack:** TensorFlow, Keras, CNN, Computer Vision
+- **Description:** Deep learning Convolutional Neural Network (CNN) trained on 60,000+ images to identify 10 distinct classes of tomato leaf diseases.
+- **Impact:** Achieved 97.9% validation accuracy, demonstrating high generalization capability for agricultural diagnosis.
+- **Repository:** [Tomato-Disease-Prediction](https://github.com/Mr-Macharia/Tomato-Disease-Prediction)
+
+### 9. **Chalrose Pharmacy**
+
+**E-Commerce & Digital Storefront Platform**
+
+- **Tech Stack:** TypeScript, Next.js, React, Tailwind CSS
+- **Description:** Full-stack e-commerce web application featuring medication catalogs, cart checkouts, and a secure dashboard for prescription management.
+- **Live Demo:** [pharmacy-chalrose.vercel.app](https://pharmacy-chalrose.vercel.app)
+- **Repository:** [pharmacy](https://github.com/Mr-Macharia/pharmacy)
+
+### 10. **Microsoft Movie Data Analysis**
+
+**Strategic & Financial Analytics for Media Venture**
+
+- **Tech Stack:** Python, Pandas, Matplotlib, Data Analytics
+- **Description:** Detailed exploratory data analysis of IMDb datasets and financial performance data to provide strategic insights for Microsoft's potential entry into the film production industry.
+- **Insights:** Visualized correlations between budget levels, genres, and domestic/worldwide gross profitability.
+- **Repository:** [Microsoft_project](https://github.com/Mr-Macharia/Microsoft_project)
+
+### 11. **Emminence Realtors**
 
 **Real Estate Web Platform**
 
-- **Tech Stack:** TypeScript, Next.js, Modern responsive design
+- **Tech Stack:** React, TypeScript, Vite, Tailwind CSS
+- **Description:** Professional real estate agency website with dynamic property listings, lead capture, and mobile-first responsive design. Built using React and Vite.
 - **Live Demo:** [emminence-realtors.vercel.app](https://emminence-realtors.vercel.app)
 - **Repository:** [emminence-realtors](https://github.com/Mr-Macharia/emminence_realtors)
 
-### 5. **Gigi Hygiene**
+### 12. **Gigi Hygiene**
 
 **E-Commerce Solution for Personal Care Brand**
 
-- **Tech Stack:** TypeScript, Next.js, Responsive UI
+- **Tech Stack:** React, TypeScript, Vite, Tailwind CSS
+- **Description:** Modern e-commerce storefront for personal care products with product catalog, shopping cart, and performance-optimized responsive UI built with React and Vite.
 - **Live Demo:** [gigi-hygiene.vercel.app](https://gigi-hygiene.vercel.app)
 - **Repository:** [gigi_hygiene](https://github.com/Mr-Macharia/gigi_hygiene)
 
-### 6. **Granite AI Agents**
+### 13. **Granite AI Agents**
 
 **Local Language Model Integration with LangChain**
 

@@ -6,15 +6,54 @@ import truthAi from '../assets/truth_ai.png';
 import emminenceRealtors from '../assets/emminence_realtors.png';
 import gigiHygiene from '../assets/gigi_hygiene.png';
 import graniteAiAgents from '../assets/granite_ai_agents.png';
+import whatsappAiAssistant from '../assets/whatsapp_ai_assistant.png';
+import resumeAssistantAi from '../assets/resume_assistant_ai.png';
+import pharmacyChalrose from '../assets/pharmacy_chalrose.png';
+import customerResearchApp from '../assets/customer_research_app.png';
+import applicationGenerator from '../assets/application_generator.png';
+import tomatoDiseasePrediction from '../assets/tomato_disease_prediction.png';
+import microsoftMovieAnalysis from '../assets/microsoft_movie_analysis.png';
 
 const projects = [
   {
+    image: whatsappAiAssistant,
+    category: 'AI Chatbot & Automation',
+    title: 'WhatsApp AI Assistant',
+    description: 'Production-ready AI assistant integrated with WhatsApp for automating customer interactions, scheduling tasks, and business workflows using Agno (AgentOS) and FastAPI.',
+    tech: ['Python', 'Agno', 'FastAPI', 'WhatsApp API'],
+    featured: true,
+    github: 'https://github.com/Mr-Macharia/whatsapp-ai-assistant',
+  },
+  {
+    image: resumeAssistantAi,
+    category: 'Intelligent Agent System',
+    title: 'Resume Assistant AI',
+    description: 'Multi-agent hiring assistant built using Agno (AgentOS) to screen, analyze, and optimize professional CVs, matching them against job descriptions.',
+    tech: ['Python', 'Agno (AgentOS)', 'FastAPI', 'Vector Search'],
+    github: 'https://github.com/Mr-Macharia/resume_assistant_ai',
+  },
+  {
+    image: applicationGenerator,
+    category: 'Multi-Agent Pipeline',
+    title: 'AI Job Application Generator',
+    description: 'Autonomous multi-agent system utilizing CrewAI and LiteLLM to compile tailored, ATS-optimized CVs and context-aware cover letters matching targeted job descriptions.',
+    tech: ['Python', 'CrewAI', 'LiteLLM', 'PDF Processing'],
+    github: 'https://github.com/Mr-Macharia/application_generator',
+  },
+  {
+    image: customerResearchApp,
+    category: 'Marketing & Analytics AI',
+    title: 'AI Customer Research App',
+    description: 'Advanced market research system built with Agno to perform deep customer sentiment analysis, profiling, and automated demographics analysis.',
+    tech: ['Python', 'Agno', 'Data Analytics', 'Pydantic'],
+    github: 'https://github.com/Mr-Macharia/Customer-Research-App',
+  },
+  {
     image: aiLogoAgent,
-    category: 'Multi-Agent AI System',
+    category: 'Multi-Agent Design System',
     title: 'AI Logo Design Agent',
     description: 'Intelligent multi-agent system that automates the end-to-end logo design process from brand research to final design delivery. Reduces manual workflow by up to 70%.',
     tech: ['Python', 'CrewAI', 'LLM Integration'],
-    featured: true,
     github: 'https://github.com/Mr-Macharia/AI-Logo-Design-Agent',
   },
   {
@@ -30,24 +69,49 @@ const projects = [
     category: 'Research & Fact-Checking',
     title: 'Truth AI',
     description: 'Advanced research agent that verifies facts and debunks myths using multiple AI sources with credibility scoring and comprehensive citation tracking.',
-    tech: ['Python', 'CrewAI', 'Google Gemini', 'Perplexity AI'],
+    tech: ['Python', 'CrewAI', 'Google Gemini', 'Streamlit'],
     github: 'https://github.com/Mr-Macharia/--Truth-AI',
   },
   {
+    image: tomatoDiseasePrediction,
+    category: 'Deep Learning & CV',
+    title: 'Tomato Leaf Disease Prediction',
+    description: 'Convolutional Neural Network (CNN) trained on 60,000+ images using TensorFlow/Keras to classify 10 classes of tomato leaf diseases with 97.9% validation accuracy.',
+    tech: ['TensorFlow', 'Keras', 'CNN', 'Computer Vision'],
+    github: 'https://github.com/Mr-Macharia/Tomato-Disease-Prediction',
+  },
+  {
+    image: pharmacyChalrose,
+    category: 'Full-Stack E-Commerce',
+    title: 'Chalrose Pharmacy',
+    description: 'E-commerce platform for a pharmacy featuring a digital storefront, medication catalog, shopping cart, and a sleek, user-friendly responsive dashboard.',
+    tech: ['TypeScript', 'Next.js', 'React', 'Tailwind CSS'],
+    live: 'https://pharmacy-chalrose.vercel.app',
+    github: 'https://github.com/Mr-Macharia/pharmacy',
+  },
+  {
+    image: microsoftMovieAnalysis,
+    category: 'Data Analytics & BI',
+    title: 'Microsoft Movie Data Analysis',
+    description: 'Exploratory data analysis of IMDb datasets and financial performance data to provide strategic insights for Microsoft\'s potential entry into the movie production industry.',
+    tech: ['Python', 'Pandas', 'Matplotlib', 'Data Analytics'],
+    github: 'https://github.com/Mr-Macharia/Microsoft_project',
+  },
+  {
     image: emminenceRealtors,
-    category: 'Full-Stack Web App',
+    category: 'Frontend Web App',
     title: 'Emminence Realtors',
-    description: 'Professional real estate agency website with dynamic property listings, lead capture, and mobile-first responsive design. SEO optimized.',
-    tech: ['TypeScript', 'Next.js', 'Responsive Design'],
+    description: 'Professional real estate agency website with dynamic property listings, lead capture, and mobile-first responsive design. Built using React and Vite.',
+    tech: ['React', 'TypeScript', 'Vite', 'Tailwind CSS'],
     live: 'https://emminence-realtors.vercel.app',
     github: 'https://github.com/Mr-Macharia/emminence_realtors',
   },
   {
     image: gigiHygiene,
-    category: 'E-Commerce Platform',
+    category: 'Frontend E-Commerce',
     title: 'Gigi Hygiene',
-    description: 'Modern e-commerce platform for personal care products with product catalog, shopping cart, and performance-optimized responsive UI.',
-    tech: ['TypeScript', 'Next.js', 'E-Commerce'],
+    description: 'Modern e-commerce storefront for personal care products with product catalog, shopping cart, and performance-optimized responsive UI built with React and Vite.',
+    tech: ['React', 'TypeScript', 'Vite', 'Tailwind CSS'],
     live: 'https://gigi-hygiene.vercel.app',
     github: 'https://github.com/Mr-Macharia/gigi_hygiene',
   },
