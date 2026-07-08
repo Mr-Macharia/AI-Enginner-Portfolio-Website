@@ -264,6 +264,8 @@ Collected, cleaned, and validated data from national and community field project
 - **AI & Automation Engineering** — One Dev Academy (Nov 2025)
 - **Generative AI** — Udacity (2024–2025)
 - **Data and AI** — ALX Africa / Cyber Shujaa (2025)
+- **Artificial Intelligence Training** — ICT Authority (Jul 2026, Credential ID: CTA-1783118955-7426-44239)
+- **Agentic AI** — DeepLearning.AI (Jul 2026, Credential ID: e2elacc8-7bbd-4a85-8549-dda3b7352a64)
 - **AI Career Essentials** — ALX Africa (2024)
 - **Elevate Leadership Program** — Leading Young (2024)
 
@@ -275,7 +277,6 @@ Evidenced by verified credentials and certificates:
 
 ### Artificial Intelligence (AI)
 
-- **Artificial Intelligence Training** - ICT Authority (Issued Jul 2026, Credential ID: CTA-1783118955-7426-44239)
 - **AI Automation Engineering** - ONE DEV (Issued Nov 2025)
 - **AI Skills badge 2025-26** - Microsoft Elevate (Jan 31, 2026)
 - **Prompt Design in Vertex AI Skill Badge** - Google Cloud (Nov 16, 2025)
@@ -283,8 +284,7 @@ Evidenced by verified credentials and certificates:
 
 ### Generative AI
 
-- **Agentic AI** - DeepLearning.AI (Issued Jul 2026, Credential ID: e2elacc8-7bbd-4a85-8549-dda3b7352a64)
-- **Agent Memory: Building Memory-Aware Agents** - DeepLearning.AI (Issued Jul 2026, Credential ID: 33ddbdf9-3e1e-4e15-a83e-d6d7a347646f)
+- **Agent Memory: Building Memory-Aware Agents** — DeepLearning.AI (Issued Jul 2026, Credential ID: 33ddbdf9-3e1e-4e15-a83e-d6d7a347646f)
 - **AI Skills badge 2025-26** - Microsoft Elevate (Jan 31, 2026)
 - **Prompt Design in Vertex AI Skill Badge** - Google Cloud (Nov 16, 2025)
 

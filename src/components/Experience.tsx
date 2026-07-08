@@ -50,6 +50,18 @@ const experiences = [
 
 const education = [
   {
+    title: 'Artificial Intelligence Training',
+    institution: 'ICT Authority',
+    date: 'Jul 2026',
+    description: 'Comprehensive training covering Artificial Intelligence methodologies, implementation frameworks, and digital workspace alignment. (Credential ID: CTA-1783118955-7426-44239)',
+  },
+  {
+    title: 'Agentic AI',
+    institution: 'DeepLearning.AI',
+    date: 'Jul 2026',
+    description: 'Planning and designing Agentic AI systems, workflow orchestration, and evaluation of multi-agent workflows. (Credential ID: e2elacc8-7bbd-4a85-8549-dda3b7352a64)',
+  },
+  {
     title: 'BSc Strategic Management',
     institution: 'Jomo Kenyatta University of Agriculture and Technology (JKUAT)',
     date: '2019 – 2023',

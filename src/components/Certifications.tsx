@@ -24,7 +24,6 @@ const skillCategories: SkillCategory[] = [
     description: "Artificial Intelligence (AI) involves applying methods that simulate human-intelligence processes such as learning, reasoning, and pattern recognition to allow systems to generate predictions or responses. It is useful in automating processes, improving decision-making, and increasing efficiency across various applications.",
     tags: ["IN DEMAND", "FUTURE PROOF"],
     badges: [
-      { name: "Artificial Intelligence Training", issuer: "ICT Authority", date: "Jul 2026", color: "blue", credentialId: "CTA-1783118955-7426-44239" },
       { name: "AI Automation Engineering", issuer: "ONE DEV", date: "Nov 2025", color: "orange", description: "A course on planning and orchestration of AI Automation Systems." },
       { name: "AI Skills badge 2025-26", issuer: "Microsoft Elevate", date: "Jan 31, 2026", color: "blue" },
       { name: "Prompt Design in Vertex AI Skill Badge", issuer: "Google Cloud", date: "Nov 16, 2025", color: "orange" },
@@ -36,7 +35,6 @@ const skillCategories: SkillCategory[] = [
     description: "Generative AI refers to the branch of artificial intelligence focused on creating new content, such as text, images, or music, by learning from existing data and patterns. It is useful in automating creative processes and enhancing content generation in various fields.",
     tags: ["IN DEMAND"],
     badges: [
-      { name: "Agentic AI", issuer: "DeepLearning.AI", date: "Jul 2026", color: "purple", credentialId: "e2elacc8-7bbd-4a85-8549-dda3b7352a64", description: "A course that explains planning and designing Agentic AI including mapping out workflows and evaluating performance." },
       { name: "Agent Memory: Building Memory-Aware Agents", issuer: "DeepLearning.AI", date: "Jul 2026", color: "purple", credentialId: "33ddbdf9-3e1e-4e15-a83e-d6d7a347646f" },
       { name: "AI Skills badge 2025-26", issuer: "Microsoft Elevate", date: "Jan 31, 2026", color: "blue" },
       { name: "Prompt Design in Vertex AI Skill Badge", issuer: "Google Cloud", date: "Nov 16, 2025", color: "orange" }
