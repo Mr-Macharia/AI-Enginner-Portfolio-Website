@@ -32,7 +32,8 @@
   --container-padding: 1.5rem;
 
   /* Typography */
-  --font-main: "Inter", -apple-system, BlinkMacSystemFont, sans-serif;
+  --font-main: "Georama", -apple-system, BlinkMacSystemFont, sans-serif;
+  --font-large: "Host Grotesk", -apple-system, BlinkMacSystemFont, sans-serif;
   --font-mono: "Fira Code", "Consolas", monospace;
 
   /* Transitions */
@@ -87,6 +88,19 @@ body {
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
   transition: background-color 0.3s ease, color 0.3s ease;
+}
+
+h1, h2, h3, h4, h5, h6,
+.hero-title,
+.name,
+.title-line,
+.section-title,
+.section-subtitle,
+.project-title,
+.timeline-title,
+.education-title,
+.badges-title {
+  font-family: var(--font-large);
 }
 
 a {
