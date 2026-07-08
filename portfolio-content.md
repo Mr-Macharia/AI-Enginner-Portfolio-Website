@@ -271,23 +271,37 @@ Collected, cleaned, and validated data from national and community field project
 
 ## Certifications & Badges
 
-Evidenced by credentials from Credly:
+Evidenced by verified credentials and certificates:
 
 ### Artificial Intelligence (AI)
 
+- **Artificial Intelligence Training** - ICT Authority (Issued Jul 2026, Credential ID: CTA-1783118955-7426-44239)
+- **AI Automation Engineering** - ONE DEV (Issued Nov 2025)
 - **AI Skills badge 2025-26** - Microsoft Elevate (Jan 31, 2026)
 - **Prompt Design in Vertex AI Skill Badge** - Google Cloud (Nov 16, 2025)
 - **Building AI-Powered Search with MongoDB Vector Search** - MongoDB (Oct 31, 2025)
+
+### Generative AI
+
+- **Agentic AI** - DeepLearning.AI (Issued Jul 2026, Credential ID: e2elacc8-7bbd-4a85-8549-dda3b7352a64)
+- **Agent Memory: Building Memory-Aware Agents** - DeepLearning.AI (Issued Jul 2026, Credential ID: 33ddbdf9-3e1e-4e15-a83e-d6d7a347646f)
+- **AI Skills badge 2025-26** - Microsoft Elevate (Jan 31, 2026)
+- **Prompt Design in Vertex AI Skill Badge** - Google Cloud (Nov 16, 2025)
+
+### Data Science
+
+- **Data and AI** - Cyber Shujaa (Issued Aug 2025, Credential ID: CS2025-DN2508240728415637)
+- **Data Science** - Moringa School (Issued Jun 2024)
+
+### Leadership & Professional Development
+
+- **Leading Young Elevate** - Leading Young (Issued Nov 2024)
+- **AI Career Essentials** - alx_africa (Issued Jul 2024)
 
 ### Cloud Computing
 
 - **Implement Load Balancing on Compute Engine Skill Badge** - Google Cloud (Nov 9, 2025)
 - **Set Up an App Dev Environment on Google Cloud Skill Badge** - Google Cloud (Nov 15, 2025)
-
-### Generative AI
-
-- **AI Skills badge 2025-26** - Microsoft Elevate (Jan 31, 2026)
-- **Prompt Design in Vertex AI Skill Badge** - Google Cloud (Nov 16, 2025)
 
 ### MongoDB
 

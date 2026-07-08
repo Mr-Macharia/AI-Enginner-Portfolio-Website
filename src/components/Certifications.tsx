@@ -2,15 +2,62 @@ import './Certifications.css';
 import ScrollReveal from './ScrollReveal';
 import ElectricBorder from './ElectricBorder';
 
-const skillCategories = [
+interface Badge {
+  name: string;
+  issuer: string;
+  date: string;
+  color: string;
+  credentialId?: string;
+  description?: string;
+}
+
+interface SkillCategory {
+  name: string;
+  description: string;
+  tags: string[];
+  badges: Badge[];
+}
+
+const skillCategories: SkillCategory[] = [
   {
     name: "Artificial Intelligence (AI)",
     description: "Artificial Intelligence (AI) involves applying methods that simulate human-intelligence processes such as learning, reasoning, and pattern recognition to allow systems to generate predictions or responses. It is useful in automating processes, improving decision-making, and increasing efficiency across various applications.",
     tags: ["IN DEMAND", "FUTURE PROOF"],
     badges: [
+      { name: "Artificial Intelligence Training", issuer: "ICT Authority", date: "Jul 2026", color: "blue", credentialId: "CTA-1783118955-7426-44239" },
+      { name: "AI Automation Engineering", issuer: "ONE DEV", date: "Nov 2025", color: "orange", description: "A course on planning and orchestration of AI Automation Systems." },
       { name: "AI Skills badge 2025-26", issuer: "Microsoft Elevate", date: "Jan 31, 2026", color: "blue" },
       { name: "Prompt Design in Vertex AI Skill Badge", issuer: "Google Cloud", date: "Nov 16, 2025", color: "orange" },
       { name: "Building AI-Powered Search with MongoDB Vector Search", issuer: "MongoDB", date: "Oct 31, 2025", color: "green" }
+    ]
+  },
+  {
+    name: "Generative AI",
+    description: "Generative AI refers to the branch of artificial intelligence focused on creating new content, such as text, images, or music, by learning from existing data and patterns. It is useful in automating creative processes and enhancing content generation in various fields.",
+    tags: ["IN DEMAND"],
+    badges: [
+      { name: "Agentic AI", issuer: "DeepLearning.AI", date: "Jul 2026", color: "purple", credentialId: "e2elacc8-7bbd-4a85-8549-dda3b7352a64", description: "A course that explains planning and designing Agentic AI including mapping out workflows and evaluating performance." },
+      { name: "Agent Memory: Building Memory-Aware Agents", issuer: "DeepLearning.AI", date: "Jul 2026", color: "purple", credentialId: "33ddbdf9-3e1e-4e15-a83e-d6d7a347646f" },
+      { name: "AI Skills badge 2025-26", issuer: "Microsoft Elevate", date: "Jan 31, 2026", color: "blue" },
+      { name: "Prompt Design in Vertex AI Skill Badge", issuer: "Google Cloud", date: "Nov 16, 2025", color: "orange" }
+    ]
+  },
+  {
+    name: "Data Science",
+    description: "Data Science covers the end-to-end process of data collection, preprocessing, exploratory data analysis, visualization, and building predictive models to extract actionable insights from structured and unstructured data.",
+    tags: ["IN DEMAND"],
+    badges: [
+      { name: "Data and AI", issuer: "Cyber Shujaa", date: "Aug 2025", color: "green", credentialId: "CS2025-DN2508240728415637", description: "A program that expounds on Data science and Artificial Intelligence." },
+      { name: "Data Science", issuer: "Moringa School", date: "Jun 2024", color: "green", description: "A program that includes the professional application of Data Analysis and Visualization and Machine Learning" }
+    ]
+  },
+  {
+    name: "Leadership & Professional Development",
+    description: "Professional development and leadership training programs designed to enhance collaboration, strategic management, communication, and AI-augmented workplace efficiency.",
+    tags: [],
+    badges: [
+      { name: "Leading Young Elevate", issuer: "Leading Young", date: "Nov 2024", color: "orange", description: "A program that nurtures leadership in youth." },
+      { name: "AI Career Essentials", issuer: "alx_africa", date: "Jul 2024", color: "blue", description: "An 8 week course on AI Augmented Professional Development Skills in the Digital Age" }
     ]
   },
   {
@@ -20,15 +67,6 @@ const skillCategories = [
     badges: [
       { name: "Implement Load Balancing on Compute Engine Skill Badge", issuer: "Google Cloud", date: "Nov 9, 2025", color: "orange" },
       { name: "Set Up an App Dev Environment on Google Cloud Skill Badge", issuer: "Google Cloud", date: "Nov 15, 2025", color: "orange" }
-    ]
-  },
-  {
-    name: "Generative AI",
-    description: "Generative AI refers to the branch of artificial intelligence focused on creating new content, such as text, images, or music, by learning from existing data and patterns. It is useful in automating creative processes and enhancing content generation in various fields.",
-    tags: [],
-    badges: [
-      { name: "AI Skills badge 2025-26", issuer: "Microsoft Elevate", date: "Jan 31, 2026", color: "blue" },
-      { name: "Prompt Design in Vertex AI Skill Badge", issuer: "Google Cloud", date: "Nov 16, 2025", color: "orange" }
     ]
   },
   {
@@ -74,7 +112,7 @@ const Certifications = () => {
           <div className="section-header">
             <span className="section-tag">Verified Skills</span>
             <h2 className="section-title">Certifications & Badges</h2>
-            <p className="section-subtitle">Evidenced by credentials from Credly</p>
+            <p className="section-subtitle">Evidenced by verified credentials and certificates</p>
           </div>
         </ScrollReveal>
 
@@ -89,7 +127,7 @@ const Certifications = () => {
               <p className="category-description">{category.description}</p>
               
               <div className="badges-container">
-                <h4 className="badges-title">Credly Badges</h4>
+                <h4 className="badges-title">Credentials & Certificates</h4>
                 <div className="badges-list">
                   {category.badges.map((badge, bIndex) => (
                     <div className="badge-item" key={`${category.name}-badge-${bIndex}`}>
@@ -103,10 +141,19 @@ const Certifications = () => {
                         {badge.color === 'green' && (
                           <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><rect x="2" y="4" width="20" height="16" rx="2" ry="2"/><path d="M6 8h.01"/><path d="M10 8h.01"/><path d="M14 8h.01"/></svg>
                         )}
+                        {badge.color === 'purple' && (
+                          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><circle cx="12" cy="8" r="7"/><polyline points="8.21 13.89 7 23 12 20 17 23 15.79 13.88"/></svg>
+                        )}
                       </div>
                       <div className="badge-info">
                         <h5>{badge.name}</h5>
                         <span>{badge.issuer} • Issued {badge.date}</span>
+                        {badge.description && (
+                          <p className="badge-description">{badge.description}</p>
+                        )}
+                        {badge.credentialId && (
+                          <span className="credential-id">ID: {badge.credentialId}</span>
+                        )}
                       </div>
                     </div>
                   ))}
