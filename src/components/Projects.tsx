@@ -263,7 +263,7 @@ function ProjectCard({ project, index, layout = 'grid' }: { project: Project; in
   }
 
   return (
-    <ScrollReveal delay={index * 100} direction={index % 2 === 0 ? 'left' : 'right'}>
+    <ScrollReveal delay={index * 100} direction="up">
       {card}
     </ScrollReveal>
   );
@@ -320,11 +320,11 @@ const Projects = () => {
         },
         ease: 'none',
         scrollTrigger: {
-          trigger: showcase,
-          start: 'top top',
+          trigger: '.projects-showcase-wrapper',
+          start: 'top 5.5rem',
           end: () => {
             const overflow = Math.max(0, track.scrollWidth - showcase.clientWidth);
-            return `+=${overflow + window.innerWidth * 0.35}`;
+            return `+=${overflow}`;
           },
           pin: true,
           scrub: 1,
@@ -340,6 +340,41 @@ const Projects = () => {
 
     ScrollTrigger.refresh();
     return () => ctx.revert();
+  }, [showPinnedShowcase]);
+
+  useEffect(() => {
+    if (!showPinnedShowcase) return;
+
+    // Refresh ScrollTrigger when images load to recalculate the track layout dimensions
+    const track = trackRef.current;
+    if (!track) return;
+
+    const images = track.querySelectorAll('img');
+    if (!images.length) return;
+
+    let loadedCount = 0;
+    const handleImageLoad = () => {
+      loadedCount++;
+      if (loadedCount === images.length) {
+        ScrollTrigger.refresh();
+      }
+    };
+
+    images.forEach((img) => {
+      if (img.complete) {
+        handleImageLoad();
+      } else {
+        img.addEventListener('load', handleImageLoad);
+        img.addEventListener('error', handleImageLoad);
+      }
+    });
+
+    return () => {
+      images.forEach((img) => {
+        img.removeEventListener('load', handleImageLoad);
+        img.removeEventListener('error', handleImageLoad);
+      });
+    };
   }, [showPinnedShowcase]);
 
   return (

@@ -1,5 +1,8 @@
-import { type ReactNode } from 'react';
-import { motion } from 'framer-motion';
+import { useEffect, useRef, type ReactNode } from 'react';
+import gsap from 'gsap';
+import { ScrollTrigger } from 'gsap/ScrollTrigger';
+
+gsap.registerPlugin(ScrollTrigger);
 
 interface ScrollRevealProps {
   children: ReactNode;
@@ -7,27 +10,60 @@ interface ScrollRevealProps {
   direction?: 'up' | 'down' | 'left' | 'right';
 }
 
-const directionOffset: Record<string, object> = {
-  up:    { y: 40 },
-  down:  { y: -40 },
-  left:  { x: 40 },
-  right: { x: -40 },
+const directionOffset = {
+  up:    { y: 45 },
+  down:  { y: -45 },
+  left:  { x: 45 },
+  right: { x: -45 },
 };
 
 export const ScrollReveal = ({ children, delay = 0, direction = 'up' }: ScrollRevealProps) => {
-  return (
-    <motion.div
-      initial={{ opacity: 0, filter: 'blur(8px)', ...directionOffset[direction] }}
-      whileInView={{ opacity: 1, filter: 'blur(0px)', y: 0, x: 0 }}
-      viewport={{ once: true, margin: '-80px' }}
-      transition={{
-        duration: 0.55,
-        ease: [0.25, 0.1, 0.25, 1] as [number, number, number, number],
+  const elementRef = useRef<HTMLDivElement>(null);
+
+  useEffect(() => {
+    const element = elementRef.current;
+    if (!element || typeof window === 'undefined') return;
+
+    if (window.matchMedia('(prefers-reduced-motion: reduce)').matches) {
+      return;
+    }
+
+    const offset = directionOffset[direction];
+
+    const ctx = gsap.context(() => {
+      // Initialize element styles to prevent flashes before execution
+      gsap.set(element, {
+        opacity: 0,
+        scale: 0.97,
+        filter: 'blur(6px)',
+        ...offset,
+      });
+
+      // Animating to fully revealed state
+      gsap.to(element, {
+        opacity: 1,
+        scale: 1,
+        filter: 'blur(0px)',
+        x: 0,
+        y: 0,
+        duration: 0.85,
         delay: delay / 1000,
-      }}
-    >
+        ease: 'power3.out',
+        scrollTrigger: {
+          trigger: element,
+          start: 'top 85%',
+          once: true,
+        },
+      });
+    }, elementRef);
+
+    return () => ctx.revert();
+  }, [delay, direction]);
+
+  return (
+    <div ref={elementRef} style={{ width: '100%' }}>
       {children}
-    </motion.div>
+    </div>
   );
 };
 

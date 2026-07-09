@@ -49,20 +49,20 @@ const Preloader = ({ onComplete }: PreloaderProps) => {
         .to(lines, {
           yPercent: 0,
           opacity: 1,
-          duration: 0.85,
-          stagger: 0.12,
+          duration: 1,
+          stagger: 0.08,
         })
         .to(lines, {
           yPercent: -110,
           opacity: 0,
-          duration: 0.65,
-          stagger: 0.08,
-        }, '+=0.25')
+          duration: 0.4,
+          stagger: 0.05,
+        }, '+=0.3')
         .to(panel, {
           clipPath: 'inset(0 0 100% 0 round 0px)',
-          duration: 0.8,
+          duration: 0.6,
           ease: 'power4.inOut',
-        }, '-=0.15')
+        }, '-=0.1')
         .to(root, {
           opacity: 0,
           duration: 0.2,

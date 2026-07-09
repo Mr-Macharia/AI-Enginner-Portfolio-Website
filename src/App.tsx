@@ -99,7 +99,7 @@ function App() {
       <div className={`app-shell ${isReady ? 'is-ready' : ''}`}>
         <Navbar activeSection={activeSection} />
         <main>
-          <Hero />
+          <Hero isReady={isReady} />
           <About />
           <Skills />
           <Suspense fallback={<SectionFallback id="projects" tag="Portfolio" title="Recent Projects" />}>

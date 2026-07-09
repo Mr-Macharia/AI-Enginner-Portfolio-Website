@@ -186,3 +186,14 @@
   background: rgba(0, 0, 0, 0.2);
   border-color: rgba(255, 255, 255, 0.05);
 }
+
+.dark .badge-item {
+  background: rgba(10, 15, 30, 0.55);
+  border-color: rgba(255, 255, 255, 0.05);
+}
+
+.dark .glass-card .badge-item:hover {
+  background: rgba(10, 15, 30, 0.8);
+  border-color: rgba(232, 93, 4, 0.25);
+  box-shadow: 0 4px 15px rgba(0, 0, 0, 0.3);
+}

@@ -1,6 +1,7 @@
 import { useEffect, useState, useRef, useCallback } from 'react';
 import { motion, useMotionValue, useSpring, useTransform } from 'framer-motion';
 import { ArrowRight, Mail } from 'lucide-react';
+import gsap from 'gsap';
 import Marquee from './Marquee';
 import { scrollToTarget } from '../lib/smoothScroll';
 import SplitHeading from './SplitHeading';
@@ -95,17 +96,7 @@ function FloatIcon({
 
 /* ─────────────────────────────────────────────────────────────────── */
 
-const containerVariants = {
-  hidden: {},
-  visible: { transition: { staggerChildren: 0.1 } },
-};
-
-const itemVariants = {
-  hidden:  { opacity: 0, y: 28 },
-  visible: { opacity: 1, y: 0, transition: { duration: 0.6, ease: [0.25, 0.1, 0.25, 1] as [number,number,number,number] } },
-};
-
-const Hero = () => {
+const Hero = ({ isReady }: { isReady: boolean }) => {
   const typedText = useTypewriter(PHRASES);
   const mag1 = useMagnetic(0.4);
   const mag2 = useMagnetic(0.3);
@@ -125,27 +116,65 @@ const Hero = () => {
     return () => window.removeEventListener('mousemove', onMove);
   }, [rawX, rawY]);
 
+  useEffect(() => {
+    if (!isReady) return;
+
+    const ctx = gsap.context(() => {
+      const tl = gsap.timeline({
+        defaults: { ease: 'power4.out', duration: 1 },
+      });
+
+      // Start state set synchronously before render frame paint
+      gsap.set('.hero-badge, .hero-title, .hero-description, .hero-marquee-shell, .hero-cta, .hero-socials', {
+        opacity: 0,
+        y: 35
+      });
+      gsap.set('.hero-visual', {
+        opacity: 0,
+        x: 45
+      });
+      gsap.set('.scroll-indicator', {
+        opacity: 0
+      });
+
+      // Animated entry timeline sequence
+      tl.to('.hero-badge, .hero-title, .hero-description, .hero-marquee-shell, .hero-cta, .hero-socials', {
+        opacity: 1,
+        y: 0,
+        stagger: 0.1,
+        duration: 0.8,
+        clearProps: 'transform'
+      })
+      .to('.hero-visual', {
+        opacity: 1,
+        x: 0,
+        duration: 1.1
+      }, '-=0.6')
+      .to('.scroll-indicator', {
+        opacity: 1,
+        duration: 0.8
+      }, '-=0.4');
+    });
+
+    return () => ctx.revert();
+  }, [isReady]);
+
   const handleJump = (event: React.MouseEvent<HTMLAnchorElement>, target: string) => {
     event.preventDefault();
     scrollToTarget(target, { offset: -24 });
   };
 
   return (
-    <section className="hero" id="home">
+    <section className="hero" id="home" style={{ opacity: isReady ? 1 : 0, transition: 'opacity 0.3s ease' }}>
       <div className="hero-wrapper">
         {/* ── Left column ── */}
-        <motion.div
-          className="hero-content"
-          variants={containerVariants}
-          initial="hidden"
-          animate="visible"
-        >
-          <motion.div className="hero-badge glass-card" variants={itemVariants}>
+        <div className="hero-content">
+          <div className="hero-badge glass-card">
             <span className="status-dot" />
             <span>Available for Freelance &amp; Consulting</span>
-          </motion.div>
+          </div>
 
-          <motion.div className="hero-title" variants={itemVariants}>
+          <div className="hero-title">
             <span className="greeting">Hello, I'm</span>
             <SplitHeading as="h1" className="name" text="Gichogu Macharia" />
             <span className="title-line">
@@ -153,30 +182,19 @@ const Hero = () => {
               <span className="title-typed">{typedText}</span>
               <span className="cursor">|</span>
             </span>
-          </motion.div>
+          </div>
 
-          <motion.p
-            className="hero-description"
-            variants={itemVariants}
-            initial={{ opacity: 0, y: 26 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ duration: 0.7, delay: 0.28, ease: [0.22, 1, 0.36, 1] as [number,number,number,number] }}
-          >
+          <p className="hero-description">
             AI Engineer, ML Engineer &amp; Data Scientist based in Nairobi, Kenya. I specialise in
             building robust AI/ML solutions, scalable data pipelines, and production-ready systems
             that drive measurable digital transformation.
-          </motion.p>
+          </p>
 
-          <motion.div
-            className="hero-marquee-shell"
-            initial={{ opacity: 0, y: 18 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ duration: 0.65, delay: 0.38, ease: [0.22, 1, 0.36, 1] as [number,number,number,number] }}
-          >
+          <div className="hero-marquee-shell">
             <Marquee items={HERO_MARQUEE_ITEMS} className="hero-marquee" />
-          </motion.div>
+          </div>
 
-          <motion.div className="hero-cta" variants={itemVariants}>
+          <div className="hero-cta">
             {/* Magnetic primary button */}
             <motion.div
               ref={mag1.ref}
@@ -198,9 +216,9 @@ const Hero = () => {
             >
               <a href="#contact" className="btn btn-secondary" onClick={(event) => handleJump(event, '#contact')}>Let's Talk</a>
             </motion.div>
-          </motion.div>
+          </div>
 
-          <motion.div className="hero-socials" variants={itemVariants}>
+          <div className="hero-socials">
             <a href="https://linkedin.com/in/gichogu-macharia" target="_blank" rel="noopener noreferrer" className="social-link" aria-label="LinkedIn">
               <svg width="20" height="20" viewBox="0 0 24 24" fill="currentColor">
                 <path d="M20.447 20.452h-3.554v-5.569c0-1.328-.027-3.037-1.852-3.037-1.853 0-2.136 1.445-2.136 2.939v5.667H9.351V9h3.414v1.561h.046c.477-.9 1.637-1.85 3.37-1.85 3.601 0 4.267 2.37 4.267 5.455v6.286zM5.337 7.433c-1.144 0-2.063-.926-2.063-2.065 0-1.138.92-2.063 2.063-2.063 1.14 0 2.064.925 2.064 2.063 0 1.139-.925 2.065-2.064 2.065zm1.782 13.019H3.555V9h3.564v11.452zM22.225 0H1.771C.792 0 0 .774 0 1.729v20.542C0 23.227.792 24 1.771 24h20.451C23.2 24 24 23.227 24 22.271V1.729C24 .774 23.2 0 22.222 0h.003z"/>
@@ -214,16 +232,11 @@ const Hero = () => {
             <a href="mailto:gichogumacharia001@gmail.com" className="social-link" aria-label="Email">
               <Mail size={20} />
             </a>
-          </motion.div>
-        </motion.div>
+          </div>
+        </div>
 
         {/* ── Right column (code window + floating icons) ── */}
-        <motion.div
-          className="hero-visual"
-          initial={{ opacity: 0, x: 40 }}
-          animate={{ opacity: 1, x: 0 }}
-          transition={{ duration: 0.7, delay: 0.3, ease: [0.25, 0.1, 0.25, 1] as [number,number,number,number] }}
-        >
+        <div className="hero-visual">
           <div className="hero-card glass-card">
             <div className="code-window">
               <div className="window-header">
@@ -257,20 +270,15 @@ const Hero = () => {
             <FloatIcon src={crewaiLogo}     alt="CrewAI"     className="icon-3" depth={0.5} mouseX={mouseX} mouseY={mouseY} />
             <FloatIcon src={llamaindexLogo} alt="LlamaIndex" className="icon-4" depth={0.7} mouseX={mouseX} mouseY={mouseY} />
           </div>
-        </motion.div>
+        </div>
       </div>
 
-      <motion.div
-        className="scroll-indicator"
-        initial={{ opacity: 0 }}
-        animate={{ opacity: 1 }}
-        transition={{ delay: 1.2 }}
-      >
+      <div className="scroll-indicator">
         <span>Scroll to explore</span>
         <div className="scroll-arrow" />
-      </motion.div>
+      </div>
     </section>
-  );
-};
-
-export default Hero;
+    );
+  };
+  
+  export default Hero;

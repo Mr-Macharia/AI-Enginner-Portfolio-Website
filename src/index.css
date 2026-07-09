@@ -861,7 +861,7 @@ ul {
   max-width: var(--container-max);
   margin: 0 auto;
   display: grid;
-  grid-template-columns: 1fr 1fr;
+  grid-template-columns: minmax(0, 1fr) minmax(0, 1fr);
   gap: clamp(1.75rem, 4vw, 4rem);
   align-items: center;
 }
@@ -1467,7 +1467,7 @@ ul {
 
 .projects-showcase {
   position: relative;
-  min-height: calc(100vh - 8rem);
+  min-height: auto;
   overflow: hidden;
 }
 
