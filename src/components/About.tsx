@@ -1,5 +1,6 @@
 import { useEffect, useRef, useState } from 'react';
 import { motion } from 'framer-motion';
+import SplitHeading from './SplitHeading';
 import profileImage from '../assets/profile.png';
 
 const About = () => {
@@ -57,7 +58,7 @@ const About = () => {
           transition={{ duration: 0.55, ease: [0.25, 0.1, 0.25, 1] as [number,number,number,number] }}
         >
           <span className="section-tag">About Me</span>
-          <h2 className="section-title">Building Intelligent Solutions</h2>
+          <SplitHeading className="section-title" text="Building Intelligent Solutions" />
         </motion.div>
         <motion.div
           className="about-grid"

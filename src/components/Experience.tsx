@@ -95,6 +95,7 @@ const education = [
 
 import ScrollReveal from './ScrollReveal';
 import ElectricBorder from './ElectricBorder';
+import SplitHeading from './SplitHeading';
 
 const Experience = () => {
   return (
@@ -103,7 +104,7 @@ const Experience = () => {
         <ScrollReveal>
           <div className="section-header">
             <span className="section-tag">Career</span>
-            <h2 className="section-title">Experience</h2>
+            <SplitHeading className="section-title" text="Experience" />
           </div>
         </ScrollReveal>
         <div className="timeline">
@@ -139,7 +140,10 @@ const Experience = () => {
 
         <div className="education-section">
           <ScrollReveal>
-            <h3 className="education-title">Education & Learning</h3>
+            <div className="education-header">
+              <span className="section-tag">Education</span>
+              <SplitHeading as="h3" className="education-title" text="Education & Learning" />
+            </div>
           </ScrollReveal>
           <div className="education-grid">
             {education.map((edu, index) => (

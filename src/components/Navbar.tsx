@@ -2,6 +2,7 @@ import { useState, useEffect, useId } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { Sun, Moon, X } from 'lucide-react';
 import { useTheme } from '../context/ThemeContext';
+import { getLenis, scrollToTarget } from '../lib/smoothScroll';
 import webLogo from '../assets/weblogo.webp';
 
 interface NavbarProps {
@@ -25,10 +26,25 @@ const Navbar = ({ activeSection }: NavbarProps) => {
   const pillId                        = useId();
 
   useEffect(() => {
+    const lenis = getLenis();
+
+    if (lenis) {
+      const onLenisScroll = ({ scroll }: { scroll: number }) => setIsScrolled(scroll > 50);
+      lenis.on('scroll', onLenisScroll);
+      setIsScrolled(lenis.scroll > 50);
+      return () => lenis.off('scroll', onLenisScroll);
+    }
+
     const onScroll = () => setIsScrolled(window.scrollY > 50);
     window.addEventListener('scroll', onScroll, { passive: true });
     return () => window.removeEventListener('scroll', onScroll);
   }, []);
+
+  const handleNavClick = (event: React.MouseEvent<HTMLAnchorElement>, href: string) => {
+    event.preventDefault();
+    scrollToTarget(href, { offset: -24 });
+    setIsMenuOpen(false);
+  };
 
   // Lock body scroll when mobile menu is open
   useEffect(() => {
@@ -41,7 +57,7 @@ const Navbar = ({ activeSection }: NavbarProps) => {
       <nav className={`navbar ${isScrolled ? 'scrolled' : ''}`}>
         <div className="nav-container">
           {/* Logo */}
-          <a href="#" className="nav-logo">
+          <a href="#home" className="nav-logo" onClick={(event) => handleNavClick(event, '#home')}>
             <img src={webLogo} alt="GM Logo" className="logo-img" />
           </a>
 
@@ -62,6 +78,7 @@ const Navbar = ({ activeSection }: NavbarProps) => {
                   <a
                     href={link.href}
                     className={`nav-link ${isActive ? 'active' : ''}`}
+                    onClick={(event) => handleNavClick(event, link.href)}
                   >
                     {link.label}
                   </a>
@@ -146,7 +163,7 @@ const Navbar = ({ activeSection }: NavbarProps) => {
                   key={link.href}
                   href={link.href}
                   className={`nav-link ${activeSection === link.href.slice(1) ? 'active' : ''}`}
-                  onClick={() => setIsMenuOpen(false)}
+                  onClick={(event) => handleNavClick(event, link.href)}
                   initial={{ opacity: 0, x: 20 }}
                   animate={{ opacity: 1, x: 0 }}
                   transition={{ delay: i * 0.05 + 0.1 }}

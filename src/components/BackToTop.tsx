@@ -1,9 +1,23 @@
 import { useState, useEffect } from 'react';
+import { getLenis, scrollToTarget } from '../lib/smoothScroll';
 
 const BackToTop = () => {
   const [isVisible, setIsVisible] = useState(false);
 
   useEffect(() => {
+    const lenis = getLenis();
+
+    if (lenis) {
+      const toggleVisibility = ({ scroll }: { scroll: number }) => {
+        setIsVisible(scroll > 500);
+      };
+
+      lenis.on('scroll', toggleVisibility);
+      setIsVisible(lenis.scroll > 500);
+
+      return () => lenis.off('scroll', toggleVisibility);
+    }
+
     const toggleVisibility = () => {
       setIsVisible(window.scrollY > 500);
     };
@@ -13,10 +27,7 @@ const BackToTop = () => {
   }, []);
 
   const scrollToTop = () => {
-    window.scrollTo({
-      top: 0,
-      behavior: 'smooth',
-    });
+    scrollToTarget('body');
   };
 
   return (

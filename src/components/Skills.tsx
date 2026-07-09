@@ -1,5 +1,6 @@
 import ScrollReveal from './ScrollReveal';
 import ElectricBorder from './ElectricBorder';
+import SplitHeading from './SplitHeading';
 
 const skillCategories = [
   {
@@ -75,7 +76,7 @@ const Skills = () => {
         <ScrollReveal>
           <div className="section-header">
             <span className="section-tag">Expertise</span>
-            <h2 className="section-title">Skills & Technologies</h2>
+            <SplitHeading className="section-title" text="Skills & Technologies" />
           </div>
         </ScrollReveal>
         <div className="skills-grid">

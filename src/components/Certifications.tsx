@@ -1,6 +1,7 @@
 import './Certifications.css';
 import ScrollReveal from './ScrollReveal';
 import ElectricBorder from './ElectricBorder';
+import SplitHeading from './SplitHeading';
 
 interface Badge {
   name: string;
@@ -109,7 +110,7 @@ const Certifications = () => {
         <ScrollReveal>
           <div className="section-header">
             <span className="section-tag">Verified Skills</span>
-            <h2 className="section-title">Certifications & Badges</h2>
+            <SplitHeading className="section-title" text="Certifications & Badges" />
             <p className="section-subtitle">Evidenced by verified credentials and certificates</p>
           </div>
         </ScrollReveal>

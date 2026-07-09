@@ -1,6 +1,9 @@
 import { useEffect, useState, useRef, useCallback } from 'react';
 import { motion, useMotionValue, useSpring, useTransform } from 'framer-motion';
 import { ArrowRight, Mail } from 'lucide-react';
+import Marquee from './Marquee';
+import { scrollToTarget } from '../lib/smoothScroll';
+import SplitHeading from './SplitHeading';
 import pythonLogo    from '../assets/python_logo.png';
 import langchainLogo from '../assets/langchain_logo.png';
 import crewaiLogo    from '../assets/crewai_logo.png';
@@ -8,6 +11,7 @@ import llamaindexLogo from '../assets/llamaindex_logo.png';
 
 /* ── Typewriter hook ──────────────────────────────────────────────── */
 const PHRASES = ['AI agents', 'ML pipelines', 'GenAI solutions', 'RAG systems', 'data-driven solutions'];
+const HERO_MARQUEE_ITEMS = ['AI ENGINEER', 'ML ENGINEER', 'GENAI SYSTEMS', 'RAG PIPELINES', 'AUTOMATION', 'DATA PRODUCTS'];
 
 function useTypewriter(phrases: string[]) {
   const [text, setText] = useState('');
@@ -121,6 +125,11 @@ const Hero = () => {
     return () => window.removeEventListener('mousemove', onMove);
   }, [rawX, rawY]);
 
+  const handleJump = (event: React.MouseEvent<HTMLAnchorElement>, target: string) => {
+    event.preventDefault();
+    scrollToTarget(target, { offset: -24 });
+  };
+
   return (
     <section className="hero" id="home">
       <div className="hero-wrapper">
@@ -136,21 +145,36 @@ const Hero = () => {
             <span>Available for Freelance &amp; Consulting</span>
           </motion.div>
 
-          <motion.h1 className="hero-title" variants={itemVariants}>
+          <motion.div className="hero-title" variants={itemVariants}>
             <span className="greeting">Hello, I'm</span>
-            <span className="name">Gichogu Macharia</span>
+            <SplitHeading as="h1" className="name" text="Gichogu Macharia" />
             <span className="title-line">
-              <span className="title-prefix">I build</span>
+              <SplitHeading as="h3" className="title-prefix" text="I build" delay={0.12} />
               <span className="title-typed">{typedText}</span>
               <span className="cursor">|</span>
             </span>
-          </motion.h1>
+          </motion.div>
 
-          <motion.p className="hero-description" variants={itemVariants}>
+          <motion.p
+            className="hero-description"
+            variants={itemVariants}
+            initial={{ opacity: 0, y: 26 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ duration: 0.7, delay: 0.28, ease: [0.22, 1, 0.36, 1] as [number,number,number,number] }}
+          >
             AI Engineer, ML Engineer &amp; Data Scientist based in Nairobi, Kenya. I specialise in
             building robust AI/ML solutions, scalable data pipelines, and production-ready systems
             that drive measurable digital transformation.
           </motion.p>
+
+          <motion.div
+            className="hero-marquee-shell"
+            initial={{ opacity: 0, y: 18 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ duration: 0.65, delay: 0.38, ease: [0.22, 1, 0.36, 1] as [number,number,number,number] }}
+          >
+            <Marquee items={HERO_MARQUEE_ITEMS} className="hero-marquee" />
+          </motion.div>
 
           <motion.div className="hero-cta" variants={itemVariants}>
             {/* Magnetic primary button */}
@@ -160,7 +184,7 @@ const Hero = () => {
               onMouseMove={mag1.onMove}
               onMouseLeave={mag1.onLeave}
             >
-              <a href="#projects" className="btn btn-primary">
+              <a href="#projects" className="btn btn-primary" onClick={(event) => handleJump(event, '#projects')}>
                 View My Work <ArrowRight size={18} />
               </a>
             </motion.div>
@@ -172,7 +196,7 @@ const Hero = () => {
               onMouseMove={mag2.onMove}
               onMouseLeave={mag2.onLeave}
             >
-              <a href="#contact" className="btn btn-secondary">Let's Talk</a>
+              <a href="#contact" className="btn btn-secondary" onClick={(event) => handleJump(event, '#contact')}>Let's Talk</a>
             </motion.div>
           </motion.div>
 

@@ -1,4 +1,5 @@
 import { motion } from 'framer-motion';
+import { scrollToTarget } from '../lib/smoothScroll';
 import webLogo         from '../assets/weblogo.webp';
 import pythonLogo      from '../assets/python_footer.svg';
 import langchainLogo   from '../assets/langchain_footer.svg';
@@ -42,6 +43,11 @@ const Footer = () => {
   // Duplicate for seamless infinite scroll
   const track = [...LOGO_ITEMS, ...LOGO_ITEMS];
 
+  const handleFooterJump = (event: React.MouseEvent<HTMLAnchorElement>, target: string) => {
+    event.preventDefault();
+    scrollToTarget(target, { offset: -24 });
+  };
+
   return (
     <footer className="footer">
       {/* ── Tech Stack Logo Strip ── */}
@@ -66,17 +72,17 @@ const Footer = () => {
           transition={{ duration: 0.55, ease: [0.25, 0.1, 0.25, 1] as [number, number, number, number] }}
         >
           <div className="footer-brand">
-            <a href="#" className="nav-logo">
+            <a href="#home" className="nav-logo" onClick={(event) => handleFooterJump(event, '#home')}>
               <img src={webLogo} alt="GM Logo" className="logo-img" />
             </a>
             <p>AI/ML Engineer &amp; Data Scientist building intelligent systems in Nairobi, Kenya 🇰🇪</p>
           </div>
           <div className="footer-links">
-            <a href="#home">Home</a>
-            <a href="#about">About</a>
-            <a href="#skills">Skills</a>
-            <a href="#projects">Projects</a>
-            <a href="#contact">Contact</a>
+            <a href="#home" onClick={(event) => handleFooterJump(event, '#home')}>Home</a>
+            <a href="#about" onClick={(event) => handleFooterJump(event, '#about')}>About</a>
+            <a href="#skills" onClick={(event) => handleFooterJump(event, '#skills')}>Skills</a>
+            <a href="#projects" onClick={(event) => handleFooterJump(event, '#projects')}>Projects</a>
+            <a href="#contact" onClick={(event) => handleFooterJump(event, '#contact')}>Contact</a>
           </div>
           <div className="footer-socials">
             <a href="https://linkedin.com/in/gichogu-macharia" target="_blank" rel="noopener noreferrer" aria-label="LinkedIn">
