@@ -123,13 +123,13 @@ const CustomCursor = () => {
     <div className={`custom-cursor-layer ${isVisible ? 'visible' : ''}`} aria-hidden="true">
       <div
         ref={ringRef}
-        className={`custom-cursor-ring ${variant}`}
+        className={`custom-cursor-ring ${variant} ${label ? 'has-label' : ''}`}
       >
         {label ? <span className="custom-cursor-label">{label}</span> : null}
       </div>
       <div
         ref={dotRef}
-        className={`custom-cursor-dot ${variant}`}
+        className={`custom-cursor-dot ${variant} ${label ? 'has-label' : ''}`}
       />
     </div>
   );

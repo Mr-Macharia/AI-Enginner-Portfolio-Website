@@ -96,6 +96,64 @@ const education = [
 import ScrollReveal from './ScrollReveal';
 import ElectricBorder from './ElectricBorder';
 import SplitHeading from './SplitHeading';
+import useTilt from '../hooks/useTilt';
+import ScrollStack, { ScrollStackItem } from './ScrollStack';
+
+interface ExperienceItem {
+  date: string;
+  title: string;
+  company: string;
+  location?: string;
+  description: string;
+  achievements?: string[];
+  tags: string[];
+}
+
+interface EducationItem {
+  title: string;
+  institution: string;
+  date: string;
+  description: string;
+}
+
+function TimelineCard({ exp }: { exp: ExperienceItem }) {
+  const cardRef = useTilt<HTMLDivElement>({ maxRotation: 6, scale: 1.01 });
+
+  return (
+    <div ref={cardRef} className="timeline-content glass-card" data-cursor-label="Read">
+      <span className="timeline-date">{exp.date}</span>
+      <h3 className="timeline-title">{exp.title}</h3>
+      <span className="timeline-company">{exp.company}</span>
+      {exp.location && <span className="timeline-location">{exp.location}</span>}
+      <p className="timeline-description">{exp.description}</p>
+      {exp.achievements && (
+        <ul className="timeline-achievements">
+          {exp.achievements.map((achievement, i) => (
+            <li key={i}>{achievement}</li>
+          ))}
+        </ul>
+      )}
+      <div className="timeline-tags">
+        {exp.tags.map((tag, tagIndex) => (
+          <span key={tagIndex}>{tag}</span>
+        ))}
+      </div>
+    </div>
+  );
+}
+
+function EducationCard({ edu }: { edu: EducationItem }) {
+  const cardRef = useTilt<HTMLDivElement>({ maxRotation: 8, scale: 1.012 });
+
+  return (
+    <div ref={cardRef} className="education-card glass-card" data-cursor-label="Academic">
+      <span className="edu-date">{edu.date}</span>
+      <h4>{edu.title}</h4>
+      <span className="edu-institution">{edu.institution}</span>
+      <p>{edu.description}</p>
+    </div>
+  );
+}
 
 const Experience = () => {
   return (
@@ -107,35 +165,16 @@ const Experience = () => {
             <SplitHeading className="section-title" text="Experience" />
           </div>
         </ScrollReveal>
-        <div className="timeline">
-          {experiences.map((exp, index) => (
-            <ScrollReveal key={index} delay={index * 80} direction={index % 2 === 0 ? 'left' : 'right'}>
-              <div className="timeline-item">
-                <div className="timeline-marker"></div>
+        <div className="experience-stack-wrapper">
+          <ScrollStack useWindowScroll={true} itemDistance={100} itemStackDistance={24} baseScale={0.88}>
+            {experiences.map((exp, index) => (
+              <ScrollStackItem key={index}>
                 <ElectricBorder className="eb-hover-only" color="#e85d04" speed={0.8} chaos={0.1} borderRadius={20}>
-                <div className="timeline-content glass-card">
-                  <span className="timeline-date">{exp.date}</span>
-                  <h3 className="timeline-title">{exp.title}</h3>
-                  <span className="timeline-company">{exp.company}</span>
-                  {exp.location && <span className="timeline-location">{exp.location}</span>}
-                  <p className="timeline-description">{exp.description}</p>
-                  {exp.achievements && (
-                    <ul className="timeline-achievements">
-                      {exp.achievements.map((achievement, i) => (
-                        <li key={i}>{achievement}</li>
-                      ))}
-                    </ul>
-                  )}
-                  <div className="timeline-tags">
-                    {exp.tags.map((tag, tagIndex) => (
-                      <span key={tagIndex}>{tag}</span>
-                    ))}
-                  </div>
-                </div>
+                  <TimelineCard exp={exp} />
                 </ElectricBorder>
-              </div>
-            </ScrollReveal>
-          ))}
+              </ScrollStackItem>
+            ))}
+          </ScrollStack>
         </div>
 
         <div className="education-section">
@@ -149,12 +188,7 @@ const Experience = () => {
             {education.map((edu, index) => (
               <ScrollReveal key={index} delay={index * 80}>
                 <ElectricBorder className="eb-hover-only" color="#e85d04" speed={0.8} chaos={0.1} borderRadius={20}>
-                <div className="education-card glass-card">
-                  <span className="edu-date">{edu.date}</span>
-                  <h4>{edu.title}</h4>
-                  <span className="edu-institution">{edu.institution}</span>
-                  <p>{edu.description}</p>
-                </div>
+                  <EducationCard edu={edu} />
                 </ElectricBorder>
               </ScrollReveal>
             ))}

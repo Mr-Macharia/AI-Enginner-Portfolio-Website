@@ -2,6 +2,7 @@ import { useEffect, useRef, useState } from 'react';
 import { motion } from 'framer-motion';
 import SplitHeading from './SplitHeading';
 import profileImage from '../assets/profile.png';
+import BorderGlow from './BorderGlow';
 
 const About = () => {
   const [counters, setCounters] = useState({ repos: 0, projects: 0, clients: 0, years: 0 });
@@ -112,12 +113,22 @@ const About = () => {
             className="about-image"
             variants={{ hidden: { opacity: 0, x: 40 }, visible: { opacity: 1, x: 0, transition: { duration: 0.6, ease: [0.25, 0.1, 0.25, 1] as [number,number,number,number] } } }}
           >
-            <div className="image-frame glass-card">
+            <BorderGlow
+              className="image-frame"
+              edgeSensitivity={30}
+              glowColor="20 100% 60%"
+              backgroundColor="var(--bg-secondary)"
+              borderRadius={28}
+              glowRadius={40}
+              glowIntensity={1.0}
+              coneSpread={25}
+              animated={true}
+              colors={['#e85d04', '#f48c06', '#dc2f02']}
+            >
               <div className="image-placeholder">
                 <img src={profileImage} alt="Gichogu Macharia" className="profile-img" />
               </div>
-              <div className="image-decoration"></div>
-            </div>
+            </BorderGlow>
           </motion.div>
         </motion.div>
       </div>

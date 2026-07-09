@@ -1,11 +1,12 @@
 import { useEffect, useRef, useState } from 'react';
-import { motion, useMotionValue, useSpring, useTransform } from 'framer-motion';
+import { motion } from 'framer-motion';
 import gsap from 'gsap';
 import { ScrollTrigger } from 'gsap/ScrollTrigger';
 import ScrollReveal from './ScrollReveal';
 import ElectricBorder from './ElectricBorder';
 import SplitHeading from './SplitHeading';
 import aiLogoAgent from '../assets/dark_mode/logo_design_agent.jpeg';
+import useTilt from '../hooks/useTilt';
 import aiAdminAssistant from '../assets/light_mode/ai_admin_assistant.jpeg';
 import truthAi from '../assets/light_mode/truth_ai.jpeg';
 import emminenceRealtors from '../assets/dark_mode/emminence_realtors.jpeg';
@@ -133,74 +134,17 @@ const projects = [
 type Project = (typeof projects)[number];
 type ProjectLayout = 'grid' | 'showcase';
 
-const tiltSpring = { stiffness: 180, damping: 18, mass: 0.6 };
-
 gsap.registerPlugin(ScrollTrigger);
 
 function ProjectCard({ project, index, layout = 'grid' }: { project: Project; index: number; layout?: ProjectLayout }) {
-  const [isInteractive, setIsInteractive] = useState(false);
-  const [isHovering, setIsHovering] = useState(false);
-  const [cursor, setCursor] = useState({ x: 0, y: 0 });
-
-  const rotateX = useMotionValue(0);
-  const rotateY = useMotionValue(0);
-  const softX = useSpring(rotateX, tiltSpring);
-  const softY = useSpring(rotateY, tiltSpring);
-  const glareX = useTransform(softY, [-7, 7], ['35%', '65%']);
-  const glareY = useTransform(softX, [-7, 7], ['35%', '65%']);
-
-  useEffect(() => {
-    if (typeof window === 'undefined') {
-      return;
-    }
-
-    const pointerQuery = window.matchMedia('(pointer: fine)');
-    const motionQuery = window.matchMedia('(prefers-reduced-motion: reduce)');
-
-    const syncInteractive = () => {
-      setIsInteractive(pointerQuery.matches && !motionQuery.matches);
-    };
-
-    syncInteractive();
-    pointerQuery.addEventListener('change', syncInteractive);
-    motionQuery.addEventListener('change', syncInteractive);
-
-    return () => {
-      pointerQuery.removeEventListener('change', syncInteractive);
-      motionQuery.removeEventListener('change', syncInteractive);
-    };
-  }, []);
-
-  const handleMove = (event: React.MouseEvent<HTMLElement>) => {
-    if (!isInteractive) {
-      return;
-    }
-
-    const bounds = event.currentTarget.getBoundingClientRect();
-    const relativeX = event.clientX - bounds.left;
-    const relativeY = event.clientY - bounds.top;
-    const rotateAroundY = ((relativeX / bounds.width) - 0.5) * 14;
-    const rotateAroundX = (0.5 - (relativeY / bounds.height)) * 14;
-
-    rotateX.set(rotateAroundX);
-    rotateY.set(rotateAroundY);
-    setCursor({ x: relativeX, y: relativeY });
-  };
-
-  const resetTilt = () => {
-    rotateX.set(0);
-    rotateY.set(0);
-    setIsHovering(false);
-  };
+  const cardRef = useTilt<HTMLElement>({ maxRotation: 12, scale: 1.045 });
 
   const card = (
     <ElectricBorder className="eb-hover-only" color="#e85d04" speed={0.8} chaos={0.1} borderRadius={20}>
-      <motion.article
+      <article
+        ref={cardRef}
         className={`project-card glass-card ${project.featured ? 'featured' : ''} ${layout === 'showcase' ? 'project-card-showcase' : ''}`}
-        style={isInteractive ? { rotateX: softX, rotateY: softY, transformStyle: 'preserve-3d' } : undefined}
-        onMouseMove={handleMove}
-        onMouseEnter={() => setIsHovering(isInteractive)}
-        onMouseLeave={resetTilt}
+        data-cursor-label="View"
       >
         <motion.div
           className="project-image"
@@ -210,10 +154,7 @@ function ProjectCard({ project, index, layout = 'grid' }: { project: Project; in
           transition={layout === 'grid' ? { duration: 0.9, ease: [0.22, 1, 0.36, 1], delay: 0.08 } : undefined}
         >
           <motion.img src={project.image} alt={project.title} className="project-img" />
-          <motion.div
-            className="project-glare"
-            style={isInteractive ? { '--glare-x': glareX, '--glare-y': glareY } as React.CSSProperties : undefined}
-          />
+          <div className="project-glare" />
           <div className="project-overlay">
             {project.live && (
               <a href={project.live} target="_blank" rel="noopener noreferrer" className="project-link" aria-label="View Live" data-cursor-label="Live">
@@ -232,18 +173,6 @@ function ProjectCard({ project, index, layout = 'grid' }: { project: Project; in
           </div>
         </motion.div>
 
-        {isInteractive && isHovering ? (
-          <motion.div
-            className="project-hover-pill"
-            initial={{ opacity: 0, scale: 0.92 }}
-            animate={{ opacity: 1, scale: 1, x: cursor.x + 18, y: cursor.y - 18 }}
-            exit={{ opacity: 0 }}
-            transition={{ type: 'spring', stiffness: 260, damping: 26 }}
-          >
-            View Project
-          </motion.div>
-        ) : null}
-
         <div className="project-content">
           <span className="project-category">{project.category}</span>
           <h3 className="project-title">{project.title}</h3>
@@ -254,7 +183,7 @@ function ProjectCard({ project, index, layout = 'grid' }: { project: Project; in
             ))}
           </div>
         </div>
-      </motion.article>
+      </article>
     </ElectricBorder>
   );
 
