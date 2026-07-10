@@ -73,7 +73,8 @@ const ElectricBorder = ({
       const sw = width - 2 * radius, sh = height - 2 * radius;
       const ca = (Math.PI * radius) / 2;
       const total = 2 * sw + 2 * sh + 4 * ca;
-      let dist = t * total, acc = 0;
+      const dist = t * total;
+      let acc = 0;
 
       if (dist <= acc + sw) return { x: left + radius + (dist - acc) / sw * sw, y: top };
       acc += sw;
@@ -153,7 +154,11 @@ const ElectricBorder = ({
         const yn = octavedNoise(p*8, octaves, lacunarity, gain, chaos, 10, timeRef.current, 1, 0);
         const dx = pt.x + xn * displacement;
         const dy = pt.y + yn * displacement;
-        i === 0 ? ctx.moveTo(dx, dy) : ctx.lineTo(dx, dy);
+        if (i === 0) {
+          ctx.moveTo(dx, dy);
+        } else {
+          ctx.lineTo(dx, dy);
+        }
       }
       ctx.closePath();
       ctx.stroke();

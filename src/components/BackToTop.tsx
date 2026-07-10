@@ -13,7 +13,9 @@ const BackToTop = () => {
       };
 
       lenis.on('scroll', toggleVisibility);
-      setIsVisible(lenis.scroll > 500);
+      requestAnimationFrame(() => {
+        setIsVisible(lenis.scroll > 500);
+      });
 
       return () => lenis.off('scroll', toggleVisibility);
     }

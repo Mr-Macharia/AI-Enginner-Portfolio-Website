@@ -214,7 +214,6 @@ const ScrollStack = ({
     baseScale,
     rotationAmount,
     blurAmount,
-    useWindowScroll,
     onStackComplete,
     calculateProgress,
     parsePercentage,
@@ -339,7 +338,8 @@ const ScrollStack = ({
     onStackComplete,
     setupLenis,
     updateCardTransforms,
-    cacheOffsets
+    cacheOffsets,
+    handleScroll
   ]);
 
   return (

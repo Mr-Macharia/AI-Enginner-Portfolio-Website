@@ -44,7 +44,9 @@ const CustomCursor = () => {
 
   useEffect(() => {
     if (!enabled) {
-      setIsVisible(false);
+      requestAnimationFrame(() => {
+        setIsVisible(false);
+      });
       return;
     }
 
