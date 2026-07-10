@@ -31,7 +31,9 @@ const Navbar = ({ activeSection }: NavbarProps) => {
     if (lenis) {
       const onLenisScroll = ({ scroll }: { scroll: number }) => setIsScrolled(scroll > 50);
       lenis.on('scroll', onLenisScroll);
-      setIsScrolled(lenis.scroll > 50);
+      requestAnimationFrame(() => {
+        setIsScrolled(lenis.scroll > 50);
+      });
       return () => lenis.off('scroll', onLenisScroll);
     }
 

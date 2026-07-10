@@ -14,13 +14,15 @@ import llamaindexLogo from '../assets/llamaindex_logo.png';
 const PHRASES = ['AI agents', 'ML pipelines', 'GenAI solutions', 'RAG systems', 'data-driven solutions'];
 const HERO_MARQUEE_ITEMS = ['AI ENGINEER', 'ML ENGINEER', 'GENAI SYSTEMS', 'RAG PIPELINES', 'AUTOMATION', 'DATA PRODUCTS'];
 
-function useTypewriter(phrases: string[]) {
+function useTypewriter(phrases: string[], enabled: boolean) {
   const [text, setText] = useState('');
   const [phraseIdx, setPhraseIdx] = useState(0);
   const [charIdx, setCharIdx] = useState(0);
   const [isDeleting, setIsDeleting] = useState(false);
 
   useEffect(() => {
+    if (!enabled) return;
+
     const target = phrases[phraseIdx];
     const atEnd = !isDeleting && charIdx === target.length;
     const delay = isDeleting ? 40 : atEnd ? 2200 : 80;
@@ -45,7 +47,7 @@ function useTypewriter(phrases: string[]) {
     }, delay);
 
     return () => clearTimeout(timeout);
-  }, [charIdx, isDeleting, phraseIdx, phrases]);
+  }, [charIdx, isDeleting, phraseIdx, phrases, enabled]);
 
   return text;
 }
@@ -97,9 +99,21 @@ function FloatIcon({
 /* ─────────────────────────────────────────────────────────────────── */
 
 const Hero = ({ isReady }: { isReady: boolean }) => {
-  const typedText = useTypewriter(PHRASES);
-  const mag1 = useMagnetic(0.4);
-  const mag2 = useMagnetic(0.3);
+  const typedText = useTypewriter(PHRASES, isReady);
+  const {
+    ref: mag1Ref,
+    sx: mag1Sx,
+    sy: mag1Sy,
+    onMove: mag1OnMove,
+    onLeave: mag1OnLeave
+  } = useMagnetic(0.4);
+  const {
+    ref: mag2Ref,
+    sx: mag2Sx,
+    sy: mag2Sy,
+    onMove: mag2OnMove,
+    onLeave: mag2OnLeave
+  } = useMagnetic(0.3);
 
   // Mouse position for parallax (raw values, normalised -1 to 1)
   const rawX = useMotionValue(0);
@@ -197,10 +211,10 @@ const Hero = ({ isReady }: { isReady: boolean }) => {
           <div className="hero-cta">
             {/* Magnetic primary button */}
             <motion.div
-              ref={mag1.ref}
-              style={{ x: mag1.sx, y: mag1.sy, display: 'inline-block' }}
-              onMouseMove={mag1.onMove}
-              onMouseLeave={mag1.onLeave}
+              ref={mag1Ref}
+              style={{ x: mag1Sx, y: mag1Sy, display: 'inline-block' }}
+              onMouseMove={mag1OnMove}
+              onMouseLeave={mag1OnLeave}
             >
               <a href="#projects" className="btn btn-primary" onClick={(event) => handleJump(event, '#projects')}>
                 View My Work <ArrowRight size={18} />
@@ -209,10 +223,10 @@ const Hero = ({ isReady }: { isReady: boolean }) => {
 
             {/* Magnetic secondary button */}
             <motion.div
-              ref={mag2.ref}
-              style={{ x: mag2.sx, y: mag2.sy, display: 'inline-block' }}
-              onMouseMove={mag2.onMove}
-              onMouseLeave={mag2.onLeave}
+              ref={mag2Ref}
+              style={{ x: mag2Sx, y: mag2Sy, display: 'inline-block' }}
+              onMouseMove={mag2OnMove}
+              onMouseLeave={mag2OnLeave}
             >
               <a href="#contact" className="btn btn-secondary" onClick={(event) => handleJump(event, '#contact')}>Let's Talk</a>
             </motion.div>

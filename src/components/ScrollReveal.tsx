@@ -29,13 +29,14 @@ export const ScrollReveal = ({ children, delay = 0, direction = 'up' }: ScrollRe
     }
 
     const offset = directionOffset[direction];
+    const isMobile = window.matchMedia('(max-width: 768px)').matches;
 
     const ctx = gsap.context(() => {
       // Initialize element styles to prevent flashes before execution
       gsap.set(element, {
         opacity: 0,
         scale: 0.97,
-        filter: 'blur(6px)',
+        ...(isMobile ? {} : { filter: 'blur(6px)' }),
         ...offset,
       });
 
@@ -43,7 +44,7 @@ export const ScrollReveal = ({ children, delay = 0, direction = 'up' }: ScrollRe
       gsap.to(element, {
         opacity: 1,
         scale: 1,
-        filter: 'blur(0px)',
+        ...(isMobile ? {} : { filter: 'blur(0px)' }),
         x: 0,
         y: 0,
         duration: 0.85,

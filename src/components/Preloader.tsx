@@ -59,7 +59,7 @@ const Preloader = ({ onComplete }: PreloaderProps) => {
           stagger: 0.05,
         }, '+=0.3')
         .to(panel, {
-          clipPath: 'inset(0 0 100% 0 round 0px)',
+          yPercent: -100,
           duration: 0.6,
           ease: 'power4.inOut',
         }, '-=0.1')

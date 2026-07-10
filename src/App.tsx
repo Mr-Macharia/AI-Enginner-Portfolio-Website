@@ -39,20 +39,42 @@ function App() {
   const [activeSection, setActiveSection] = useState('home');
   const [isReady, setIsReady] = useState(false);
   const progressRef = useRef<HTMLDivElement>(null);
+  const sectionOffsetsRef = useRef<{ id: string; top: number }[]>([]);
 
   useEffect(() => {
     if (!isReady) {
       return;
     }
 
-    const updateScrollState = (scrollY = window.scrollY) => {
-      // Active section tracking
+    const cacheSectionOffsets = () => {
       const sections = document.querySelectorAll('section[id]');
-      let current = 'home';
+      const offsets: { id: string; top: number }[] = [];
       sections.forEach((section) => {
-        const top = section.getBoundingClientRect().top;
-        if (top <= window.innerHeight / 3) {
-          current = section.getAttribute('id') || 'home';
+        let top = 0;
+        let curr = section as HTMLElement | null;
+        while (curr) {
+          top += curr.offsetTop;
+          curr = curr.offsetParent as HTMLElement | null;
+        }
+        offsets.push({
+          id: section.getAttribute('id') || '',
+          top,
+        });
+      });
+      sectionOffsetsRef.current = offsets;
+    };
+
+    cacheSectionOffsets();
+    window.addEventListener('resize', cacheSectionOffsets, { passive: true });
+
+    const updateScrollState = (scrollY = window.scrollY) => {
+      // Active section tracking using cached static top offsets
+      const threshold = window.innerHeight / 3;
+      let current = 'home';
+      sectionOffsetsRef.current.forEach(({ id, top }) => {
+        const relativeTop = top - scrollY;
+        if (relativeTop <= threshold) {
+          current = id;
         }
       });
       setActiveSection(current);
@@ -77,6 +99,7 @@ function App() {
 
       return () => {
         lenis.off('scroll', onLenisScroll);
+        window.removeEventListener('resize', cacheSectionOffsets);
         destroySmoothScroll();
       };
     }
@@ -86,7 +109,10 @@ function App() {
     window.addEventListener('scroll', handleScroll, { passive: true });
     updateScrollState(window.scrollY);
 
-    return () => window.removeEventListener('scroll', handleScroll);
+    return () => {
+      window.removeEventListener('scroll', handleScroll);
+      window.removeEventListener('resize', cacheSectionOffsets);
+    };
   }, [isReady]);
 
   return (
