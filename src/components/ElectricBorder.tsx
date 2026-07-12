@@ -186,9 +186,32 @@ const ElectricBorder = ({
       animationRef.current = requestAnimationFrame(draw);
     };
 
+    const handleResize = () => {
+      const w = container.clientWidth;
+      const h = container.clientHeight;
+      if (w === 0 || h === 0) return;
+
+      const canvasW = w + borderOffset * 2;
+      const canvasH = h + borderOffset * 2;
+      const dpr = Math.min(window.devicePixelRatio || 1, 2);
+      canvas.width = canvasW * dpr;
+      canvas.height = canvasH * dpr;
+      canvas.style.width = `${canvasW}px`;
+      canvas.style.height = `${canvasH}px`;
+      ctx.scale(dpr, dpr);
+
+      width = canvasW;
+      height = canvasH;
+    };
+
+    // Initialize size immediately
+    handleResize();
+
     const startAnimation = () => {
       isHoveredRef.current = true;
       setHovered(true);
+      // Re-measure size on hover start to ensure it is accurate
+      handleResize();
       const isDarkMode = document.documentElement.classList.contains('dark');
       if (isDarkMode && !animationRef.current) {
         lastFrameTimeRef.current = performance.now();
@@ -205,40 +228,14 @@ const ElectricBorder = ({
       ctx.scale(dpr, dpr);
     };
 
-    const ro = new ResizeObserver((entries) => {
-      if (!entries || !entries.length) return;
-      const entry = entries[0];
-      let w = 0;
-      let h = 0;
-      if (entry.borderBoxSize && entry.borderBoxSize[0]) {
-        w = entry.borderBoxSize[0].inlineSize;
-        h = entry.borderBoxSize[0].blockSize;
-      } else {
-        w = entry.contentRect.width;
-        h = entry.contentRect.height;
-      }
-
-      const canvasW = w + borderOffset * 2;
-      const canvasH = h + borderOffset * 2;
-      const dpr = Math.min(window.devicePixelRatio || 1, 2);
-      canvas.width = canvasW * dpr;
-      canvas.height = canvasH * dpr;
-      canvas.style.width = `${canvasW}px`;
-      canvas.style.height = `${canvasH}px`;
-      ctx.scale(dpr, dpr);
-
-      width = canvasW;
-      height = canvasH;
-    });
-    ro.observe(container);
-
+    window.addEventListener('resize', handleResize, { passive: true });
     container.addEventListener('mouseenter', startAnimation);
     container.addEventListener('mouseleave', stopAnimation);
 
     return () => {
       cancelAnimationFrame(animationRef.current);
       animationRef.current = 0;
-      ro.disconnect();
+      window.removeEventListener('resize', handleResize);
       container.removeEventListener('mouseenter', startAnimation);
       container.removeEventListener('mouseleave', stopAnimation);
     };

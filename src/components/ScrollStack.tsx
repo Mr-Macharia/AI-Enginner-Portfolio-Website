@@ -60,6 +60,9 @@ const ScrollStack = ({
   const cardOffsetsRef = useRef<number[]>([]);
   const endElementOffsetRef = useRef<number>(0);
   const scrollTickerRef = useRef<number | null>(null);
+  const lastScrollTimeRef = useRef(0);
+  const resizeTickerRef = useRef<number | null>(null);
+  const lastScrollHeightRef = useRef(0);
 
   const calculateProgress = useCallback((scrollTop: number, start: number, end: number) => {
     if (scrollTop < start) return 0;
@@ -76,8 +79,9 @@ const ScrollStack = ({
 
   const getScrollData = useCallback(() => {
     if (useWindowScroll) {
+      const lenis = getLenis();
       return {
-        scrollTop: window.scrollY,
+        scrollTop: lenis ? lenis.scroll : window.scrollY,
         containerHeight: window.innerHeight,
         scrollContainer: document.documentElement
       };
@@ -222,6 +226,7 @@ const ScrollStack = ({
   ]);
 
   const handleScroll = useCallback(function scrollListener() {
+    lastScrollTimeRef.current = performance.now();
     if (useWindowScroll && !lenisRef.current) {
       const lenis = getLenis();
       if (lenis) {
@@ -231,11 +236,17 @@ const ScrollStack = ({
       }
     }
 
-    if (scrollTickerRef.current) return;
-    scrollTickerRef.current = requestAnimationFrame(() => {
+    if (lenisRef.current) {
+      // Lenis scroll callback already runs in a requestAnimationFrame ticker, so execute synchronously to avoid 1-frame visual lag
       updateCardTransforms();
-      scrollTickerRef.current = null;
-    });
+    } else {
+      // Fallback native window scroll needs throttling
+      if (scrollTickerRef.current) return;
+      scrollTickerRef.current = requestAnimationFrame(() => {
+        updateCardTransforms();
+        scrollTickerRef.current = null;
+      });
+    }
   }, [useWindowScroll, updateCardTransforms]);
 
   const setupLenis = useCallback(() => {
@@ -321,9 +332,27 @@ const ScrollStack = ({
 
     let ro: ResizeObserver | null = null;
     if (typeof window !== 'undefined' && 'ResizeObserver' in window) {
+      // Record initial scroll height on mount
+      lastScrollHeightRef.current = document.body.scrollHeight;
       ro = new ResizeObserver(() => {
-        cacheOffsets();
-        updateCardTransforms();
+        // Skip caching offsets if the user has scrolled within the last 150ms to prevent jitter feedback loops
+        if (performance.now() - lastScrollTimeRef.current < 150) {
+          return;
+        }
+
+        // Only run recalculations if the document's total scroll height has actually changed
+        const currentHeight = document.body.scrollHeight;
+        if (currentHeight === lastScrollHeightRef.current) {
+          return;
+        }
+        lastScrollHeightRef.current = currentHeight;
+        
+        if (resizeTickerRef.current) cancelAnimationFrame(resizeTickerRef.current);
+        resizeTickerRef.current = requestAnimationFrame(() => {
+          cacheOffsets();
+          updateCardTransforms();
+          resizeTickerRef.current = null;
+        });
       });
       ro.observe(document.body);
     }
@@ -331,6 +360,9 @@ const ScrollStack = ({
     return () => {
       window.removeEventListener('resize', handleResize);
       ro?.disconnect();
+      if (resizeTickerRef.current) {
+        cancelAnimationFrame(resizeTickerRef.current);
+      }
       if (animationFrameRef.current) {
         cancelAnimationFrame(animationFrameRef.current);
       }
