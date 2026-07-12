@@ -59,6 +59,7 @@ const ScrollStack = ({
   const isUpdatingRef = useRef(false);
   const cardOffsetsRef = useRef<number[]>([]);
   const endElementOffsetRef = useRef<number>(0);
+  const scrollTickerRef = useRef<number | null>(null);
 
   const calculateProgress = useCallback((scrollTop: number, start: number, end: number) => {
     if (scrollTop < start) return 0;
@@ -221,7 +222,11 @@ const ScrollStack = ({
   ]);
 
   const handleScroll = useCallback(() => {
-    updateCardTransforms();
+    if (scrollTickerRef.current) return;
+    scrollTickerRef.current = requestAnimationFrame(() => {
+      updateCardTransforms();
+      scrollTickerRef.current = null;
+    });
   }, [updateCardTransforms]);
 
   const setupLenis = useCallback(() => {
@@ -309,6 +314,9 @@ const ScrollStack = ({
       window.removeEventListener('resize', handleResize);
       if (animationFrameRef.current) {
         cancelAnimationFrame(animationFrameRef.current);
+      }
+      if (scrollTickerRef.current) {
+        cancelAnimationFrame(scrollTickerRef.current);
       }
       if (lenisRef.current) {
         if (useWindowScroll) {

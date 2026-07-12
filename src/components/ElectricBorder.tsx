@@ -13,6 +13,12 @@ interface ElectricBorderProps {
   style?: CSSProperties;
 }
 
+// Pre-generated 512-element random number lookup table
+const RANDOM_TABLE = Array.from({ length: 512 }, (_, i) => {
+  const x = i + 0.5;
+  return Math.abs((Math.sin(x * 12.9898) * 43758.5453) % 1);
+});
+
 const ElectricBorder = ({
   children,
   color = '#e85d04',
@@ -29,19 +35,20 @@ const ElectricBorder = ({
   const lastFrameTimeRef = useRef(0);
   const isHoveredRef = useRef(false);
   const [hovered, setHovered] = useState(false);
-
-  const random = useCallback((x: number) => (Math.sin(x * 12.9898) * 43758.5453) % 1, []);
+  const [inView, setInView] = useState(false);
 
   const noise2D = useCallback(
     (x: number, y: number) => {
       const i = Math.floor(x), j = Math.floor(y);
       const fx = x - i, fy = y - j;
-      const a = random(i + j * 57), b = random(i + 1 + j * 57);
-      const c = random(i + (j + 1) * 57), d = random(i + 1 + (j + 1) * 57);
+      const a = RANDOM_TABLE[(i + j * 57) & 511];
+      const b = RANDOM_TABLE[(i + 1 + j * 57) & 511];
+      const c = RANDOM_TABLE[(i + (j + 1) * 57) & 511];
+      const d = RANDOM_TABLE[(i + 1 + (j + 1) * 57) & 511];
       const ux = fx * fx * (3 - 2 * fx), uy = fy * fy * (3 - 2 * fy);
       return a*(1-ux)*(1-uy) + b*ux*(1-uy) + c*(1-ux)*uy + d*ux*uy;
     },
-    [random]
+    []
   );
 
   const octavedNoise = useCallback(
@@ -95,30 +102,40 @@ const ElectricBorder = ({
     [getCornerPoint]
   );
 
+  // Viewport Intersection Observer
   useEffect(() => {
+    const container = containerRef.current;
+    if (!container || typeof window === 'undefined') return;
+
+    const io = new IntersectionObserver(
+      (entries) => {
+        if (entries[0]) {
+          setInView(entries[0].isIntersecting);
+        }
+      },
+      { rootMargin: '200px' }
+    );
+
+    io.observe(container);
+    return () => io.disconnect();
+  }, []);
+
+  // Main canvas rendering effect
+  useEffect(() => {
+    if (!inView) return;
+
     const canvas = canvasRef.current, container = containerRef.current;
     if (!canvas || !container) return;
     const ctx = canvas.getContext('2d');
     if (!ctx) return;
 
-    // Reduced octaves 10→5 for ~50% less math per frame
     const octaves = 5, lacunarity = 1.6, gain = 0.7;
     const displacement = 60, borderOffset = 60;
-
-    const updateSize = () => {
-      const rect = container.getBoundingClientRect();
-      const w = rect.width + borderOffset * 2, h = rect.height + borderOffset * 2;
-      const dpr = Math.min(window.devicePixelRatio || 1, 2);
-      canvas.width = w * dpr; canvas.height = h * dpr;
-      canvas.style.width = `${w}px`; canvas.style.height = `${h}px`;
-      ctx.scale(dpr, dpr);
-      return { width: w, height: h };
-    };
-
-    let { width, height } = updateSize();
+    
+    let width = 0;
+    let height = 0;
 
     const draw = (now: number) => {
-      // Stop loop immediately if mouse has left
       if (!isHoveredRef.current) {
         animationRef.current = 0;
         return;
@@ -140,10 +157,14 @@ const ElectricBorder = ({
 
       const left = borderOffset, top = borderOffset;
       const bw = width - 2 * borderOffset, bh = height - 2 * borderOffset;
+      if (bw <= 0 || bh <= 0) {
+        animationRef.current = requestAnimationFrame(draw);
+        return;
+      }
+
       const maxR = Math.min(bw, bh) / 2;
       const r = Math.min(borderRadius, maxR);
       const approxPerim = 2 * (bw + bh) + 2 * Math.PI * r;
-      // Reduced sample density /2→/3 (imperceptible quality drop, ~33% less work)
       const samples = Math.floor(approxPerim / 3);
 
       ctx.beginPath();
@@ -168,7 +189,6 @@ const ElectricBorder = ({
     const startAnimation = () => {
       isHoveredRef.current = true;
       setHovered(true);
-      // Only run canvas animation in dark mode
       const isDarkMode = document.documentElement.classList.contains('dark');
       if (isDarkMode && !animationRef.current) {
         lastFrameTimeRef.current = performance.now();
@@ -179,15 +199,36 @@ const ElectricBorder = ({
     const stopAnimation = () => {
       isHoveredRef.current = false;
       setHovered(false);
-      // Clear canvas so no stale frame lingers
       const dpr = Math.min(window.devicePixelRatio || 1, 2);
       ctx.setTransform(1, 0, 0, 1, 0, 0);
       ctx.clearRect(0, 0, canvas.width, canvas.height);
       ctx.scale(dpr, dpr);
     };
 
-    const ro = new ResizeObserver(() => {
-      const s = updateSize(); width = s.width; height = s.height;
+    const ro = new ResizeObserver((entries) => {
+      if (!entries || !entries.length) return;
+      const entry = entries[0];
+      let w = 0;
+      let h = 0;
+      if (entry.borderBoxSize && entry.borderBoxSize[0]) {
+        w = entry.borderBoxSize[0].inlineSize;
+        h = entry.borderBoxSize[0].blockSize;
+      } else {
+        w = entry.contentRect.width;
+        h = entry.contentRect.height;
+      }
+
+      const canvasW = w + borderOffset * 2;
+      const canvasH = h + borderOffset * 2;
+      const dpr = Math.min(window.devicePixelRatio || 1, 2);
+      canvas.width = canvasW * dpr;
+      canvas.height = canvasH * dpr;
+      canvas.style.width = `${canvasW}px`;
+      canvas.style.height = `${canvasH}px`;
+      ctx.scale(dpr, dpr);
+
+      width = canvasW;
+      height = canvasH;
     });
     ro.observe(container);
 
@@ -201,7 +242,7 @@ const ElectricBorder = ({
       container.removeEventListener('mouseenter', startAnimation);
       container.removeEventListener('mouseleave', stopAnimation);
     };
-  }, [color, speed, chaos, borderRadius, octavedNoise, getRoundedRectPoint]);
+  }, [inView, color, speed, chaos, borderRadius, octavedNoise, getRoundedRectPoint]);
 
   return (
     <div
@@ -210,7 +251,7 @@ const ElectricBorder = ({
       style={{ '--electric-border-color': color, borderRadius, ...style } as CSSProperties}
     >
       <div className="eb-canvas-container">
-        <canvas ref={canvasRef} className="eb-canvas" />
+        {inView && <canvas ref={canvasRef} className="eb-canvas" />}
       </div>
       <div className="eb-layers" style={{ opacity: hovered ? 1 : 0, transition: 'opacity 0.35s ease' }}>
         <div className="eb-glow-1" />

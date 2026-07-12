@@ -32,12 +32,24 @@ export function ThemeProvider({ children }: { children: React.ReactNode }) {
   }, [theme])
 
   const toggleTheme = () => {
-    const root = document.documentElement
-    root.classList.add('theme-transition')
-    setTheme(prev => (prev === 'dark' ? 'light' : 'dark'))
-    setTimeout(() => {
-      root.classList.remove('theme-transition')
-    }, 300)
+    const nextTheme = theme === 'dark' ? 'light' : 'dark';
+    const doc = document as typeof document & {
+      startViewTransition?: (callback: () => void) => void;
+    };
+
+    if (!doc.startViewTransition) {
+      const root = document.documentElement;
+      root.classList.add('theme-transition');
+      setTheme(nextTheme);
+      setTimeout(() => {
+        root.classList.remove('theme-transition');
+      }, 300);
+      return;
+    }
+
+    doc.startViewTransition(() => {
+      setTheme(nextTheme);
+    });
   }
 
   return (

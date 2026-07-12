@@ -52,6 +52,11 @@ function useTypewriter(phrases: string[], enabled: boolean) {
   return text;
 }
 
+function Typewriter({ phrases, enabled }: { phrases: string[]; enabled: boolean }) {
+  const typedText = useTypewriter(phrases, enabled);
+  return <>{typedText}</>;
+}
+
 /* ── Magnetic button hook ─────────────────────────────────────────── */
 function useMagnetic(strength = 0.35) {
   const ref = useRef<HTMLDivElement>(null);
@@ -99,7 +104,6 @@ function FloatIcon({
 /* ─────────────────────────────────────────────────────────────────── */
 
 const Hero = ({ isReady }: { isReady: boolean }) => {
-  const typedText = useTypewriter(PHRASES, isReady);
   const {
     ref: mag1Ref,
     sx: mag1Sx,
@@ -193,7 +197,7 @@ const Hero = ({ isReady }: { isReady: boolean }) => {
             <SplitHeading as="h1" className="name" text="Gichogu Macharia" />
             <span className="title-line">
               <SplitHeading as="h3" className="title-prefix" text="I build" delay={0.12} />
-              <span className="title-typed">{typedText}</span>
+              <span className="title-typed"><Typewriter phrases={PHRASES} enabled={isReady} /></span>
               <span className="cursor">|</span>
             </span>
           </div>

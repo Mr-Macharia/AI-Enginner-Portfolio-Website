@@ -63,11 +63,17 @@
   --glass-shadow: 0 8px 32px rgba(0, 0, 0, 0.4);
 }
 
-/* Smooth theme transition */
+/* Smooth theme transition (fallback for browsers without View Transition API) */
 .theme-transition,
-.theme-transition *,
-.theme-transition *::before,
-.theme-transition *::after {
+.theme-transition body,
+.theme-transition .glass-card,
+.theme-transition .navbar,
+.theme-transition .btn,
+.theme-transition .section-title,
+.theme-transition .section-tag,
+.theme-transition p,
+.theme-transition span,
+.theme-transition a {
   transition: background-color 0.3s ease, border-color 0.3s ease, color 0.3s ease !important;
 }
 
@@ -376,6 +382,8 @@ ul {
 /* Cursor Glow Effect */
 .cursor-glow {
   position: fixed;
+  left: 0;
+  top: 0;
   width: 500px;
   height: 500px;
   background: radial-gradient(
@@ -387,10 +395,10 @@ ul {
   );
   border-radius: 50%;
   pointer-events: none;
-  transform: translate(-50%, -50%);
+  transform: translate3d(-50%, -50%, 0);
   z-index: 0;
   filter: blur(30px);
-  will-change: left, top;
+  will-change: transform;
 }
 
 .custom-cursor-layer {
@@ -415,6 +423,7 @@ ul {
   border-radius: 999px;
   pointer-events: none;
   mix-blend-mode: difference;
+  will-change: transform;
 }
 
 .custom-cursor-ring {

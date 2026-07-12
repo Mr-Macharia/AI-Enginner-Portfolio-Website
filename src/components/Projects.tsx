@@ -333,9 +333,11 @@ const Projects = () => {
           </div>
         ) : null}
 
-        <div className={`projects-grid ${showPinnedShowcase ? 'projects-grid-fallback' : ''}`}>
-          {projects.map((project, index) => <ProjectCard key={project.title} project={project} index={index} />)}
-        </div>
+        {!showPinnedShowcase && (
+          <div className="projects-grid">
+            {projects.map((project, index) => <ProjectCard key={project.title} project={project} index={index} />)}
+          </div>
+        )}
       </div>
     </section>
   );

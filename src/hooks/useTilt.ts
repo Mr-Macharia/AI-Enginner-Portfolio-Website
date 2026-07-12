@@ -30,13 +30,25 @@ export function useTilt<T extends HTMLElement>(options: TiltOptions = {}) {
     // Configure 3D properties on the element
     gsap.set(el, { transformPerspective: perspective, transformStyle: 'preserve-3d' });
 
+    let rectLeft = 0;
+    let rectTop = 0;
+    let rectWidth = 0;
+    let rectHeight = 0;
+
     const handleMouseMove = (e: MouseEvent) => {
-      const rect = el.getBoundingClientRect();
-      const x = e.clientX - rect.left;
-      const y = e.clientY - rect.top;
+      if (rectWidth === 0) {
+        const rect = el.getBoundingClientRect();
+        rectLeft = rect.left + window.scrollX;
+        rectTop = rect.top + window.scrollY;
+        rectWidth = rect.width;
+        rectHeight = rect.height;
+      }
       
-      const percentX = x / rect.width;
-      const percentY = y / rect.height;
+      const x = e.pageX - rectLeft;
+      const y = e.pageY - rectTop;
+      
+      const percentX = Math.max(0, Math.min(1, x / rectWidth));
+      const percentY = Math.max(0, Math.min(1, y / rectHeight));
       
       // Calculate rotation relative to card center
       const rotateX = (0.5 - percentY) * maxRotation;
@@ -58,6 +70,12 @@ export function useTilt<T extends HTMLElement>(options: TiltOptions = {}) {
     };
 
     const handleMouseEnter = () => {
+      const rect = el.getBoundingClientRect();
+      rectLeft = rect.left + window.scrollX;
+      rectTop = rect.top + window.scrollY;
+      rectWidth = rect.width;
+      rectHeight = rect.height;
+
       gsap.to(el, {
         scale,
         duration: 0.35,
@@ -67,6 +85,7 @@ export function useTilt<T extends HTMLElement>(options: TiltOptions = {}) {
     };
 
     const handleMouseLeave = () => {
+      rectWidth = 0;
       gsap.to(el, {
         rotateX: 0,
         rotateY: 0,
