@@ -221,13 +221,22 @@ const ScrollStack = ({
     getScrollData
   ]);
 
-  const handleScroll = useCallback(() => {
+  const handleScroll = useCallback(function scrollListener() {
+    if (useWindowScroll && !lenisRef.current) {
+      const lenis = getLenis();
+      if (lenis) {
+        window.removeEventListener('scroll', scrollListener);
+        lenis.on('scroll', scrollListener);
+        lenisRef.current = lenis;
+      }
+    }
+
     if (scrollTickerRef.current) return;
     scrollTickerRef.current = requestAnimationFrame(() => {
       updateCardTransforms();
       scrollTickerRef.current = null;
     });
-  }, [updateCardTransforms]);
+  }, [useWindowScroll, updateCardTransforms]);
 
   const setupLenis = useCallback(() => {
     if (useWindowScroll) {
@@ -310,8 +319,18 @@ const ScrollStack = ({
 
     window.addEventListener('resize', handleResize, { passive: true });
 
+    let ro: ResizeObserver | null = null;
+    if (typeof window !== 'undefined' && 'ResizeObserver' in window) {
+      ro = new ResizeObserver(() => {
+        cacheOffsets();
+        updateCardTransforms();
+      });
+      ro.observe(document.body);
+    }
+
     return () => {
       window.removeEventListener('resize', handleResize);
+      ro?.disconnect();
       if (animationFrameRef.current) {
         cancelAnimationFrame(animationFrameRef.current);
       }
