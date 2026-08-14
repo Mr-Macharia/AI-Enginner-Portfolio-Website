@@ -5,20 +5,20 @@ import { ScrollTrigger } from 'gsap/ScrollTrigger';
 import ScrollReveal from './ScrollReveal';
 import ElectricBorder from './ElectricBorder';
 import SplitHeading from './SplitHeading';
-import aiLogoAgent from '../assets/dark_mode/logo_design_agent.jpeg';
+import aiLogoAgent from '../assets/dark_mode/logo_design_agent.webp';
 import useTilt from '../hooks/useTilt';
-import aiAdminAssistant from '../assets/light_mode/ai_admin_assistant.jpeg';
-import truthAi from '../assets/light_mode/truth_ai.jpeg';
-import emminenceRealtors from '../assets/dark_mode/emminence_realtors.jpeg';
-import gigiHygiene from '../assets/light_mode/gigi_hygiene.jpeg';
-import graniteAiAgents from '../assets/dark_mode/granite_ai_agents.jpeg';
-import whatsappAiAssistant from '../assets/dark_mode/whatsapp_agent.jpeg';
-import resumeAssistantAi from '../assets/light_mode/resume_ai_assistant.jpeg';
-import pharmacyChalrose from '../assets/dark_mode/chalrose_pharmacy.jpeg';
-import customerResearchApp from '../assets/dark_mode/customer_research_app.jpeg';
-import applicationGenerator from '../assets/light_mode/job_application_generator.jpeg';
-import tomatoDiseasePrediction from '../assets/dark_mode/tomato_leaf_disease.jpeg';
-import microsoftMovieAnalysis from '../assets/light_mode/microsft_movie.jpeg';
+import aiAdminAssistant from '../assets/light_mode/ai_admin_assistant.webp';
+import truthAi from '../assets/light_mode/truth_ai.webp';
+import emminenceRealtors from '../assets/dark_mode/emminence_realtors.webp';
+import gigiHygiene from '../assets/light_mode/gigi_hygiene.webp';
+import graniteAiAgents from '../assets/dark_mode/granite_ai_agents.webp';
+import whatsappAiAssistant from '../assets/dark_mode/whatsapp_agent.webp';
+import resumeAssistantAi from '../assets/light_mode/resume_ai_assistant.webp';
+import pharmacyChalrose from '../assets/dark_mode/chalrose_pharmacy.webp';
+import customerResearchApp from '../assets/dark_mode/customer_research_app.webp';
+import applicationGenerator from '../assets/light_mode/job_application_generator.webp';
+import tomatoDiseasePrediction from '../assets/dark_mode/tomato_leaf_disease.webp';
+import microsoftMovieAnalysis from '../assets/light_mode/microsft_movie.webp';
 
 const projects = [
   {
@@ -153,7 +153,15 @@ function ProjectCard({ project, index, layout = 'grid' }: { project: Project; in
           viewport={layout === 'grid' ? { once: true, margin: '-10% 0px' } : undefined}
           transition={layout === 'grid' ? { duration: 0.9, ease: [0.22, 1, 0.36, 1], delay: 0.08 } : undefined}
         >
-          <motion.img src={project.image} alt={project.title} className="project-img" />
+          <motion.img
+            src={project.image}
+            alt={project.title}
+            className="project-img"
+            loading="lazy"
+            decoding="async"
+            width="600"
+            height="360"
+          />
           <div className="project-glare" />
           <div className="project-overlay">
             {project.live && (

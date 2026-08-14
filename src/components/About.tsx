@@ -1,7 +1,7 @@
 import { useEffect, useRef, useState } from 'react';
 import { motion } from 'framer-motion';
 import SplitHeading from './SplitHeading';
-import profileImage from '../assets/profile.png';
+import profileImage from '../assets/profile.webp';
 import BorderGlow from './BorderGlow';
 
 const About = () => {
@@ -126,7 +126,15 @@ const About = () => {
               colors={['#e85d04', '#f48c06', '#dc2f02']}
             >
               <div className="image-placeholder">
-                <img src={profileImage} alt="Gichogu Macharia" className="profile-img" />
+                <img
+                  src={profileImage}
+                  alt="Gichogu Macharia"
+                  className="profile-img"
+                  width="400"
+                  height="400"
+                  loading="lazy"
+                  decoding="async"
+                />
               </div>
             </BorderGlow>
           </motion.div>

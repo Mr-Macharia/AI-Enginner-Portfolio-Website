@@ -5,10 +5,10 @@ import gsap from 'gsap';
 import Marquee from './Marquee';
 import { scrollToTarget } from '../lib/smoothScroll';
 import SplitHeading from './SplitHeading';
-import pythonLogo    from '../assets/python_logo.png';
-import langchainLogo from '../assets/langchain_logo.png';
-import crewaiLogo    from '../assets/crewai_logo.png';
-import llamaindexLogo from '../assets/llamaindex_logo.png';
+import pythonLogo    from '../assets/python_logo.webp';
+import langchainLogo from '../assets/langchain_logo.webp';
+import crewaiLogo    from '../assets/crewai_logo.webp';
+import llamaindexLogo from '../assets/llamaindex_logo.webp';
 
 /* ── Typewriter hook ──────────────────────────────────────────────── */
 const PHRASES = ['AI agents', 'ML pipelines', 'GenAI solutions', 'RAG systems', 'data-driven solutions'];
@@ -93,6 +93,9 @@ function FloatIcon({
     <motion.img
       src={src}
       alt={alt}
+      width="48"
+      height="48"
+      decoding="async"
       className={`float-icon ${className}`}
       style={{ x: tx, y: ty }}
       animate={{ y: [0, -14, 0] }}

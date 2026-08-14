@@ -9,7 +9,7 @@ import Footer from './components/Footer';
 import BackToTop from './components/BackToTop';
 import CustomCursor from './components/CustomCursor';
 import GrainOverlay from './components/GrainOverlay';
-import Preloader from './components/Preloader';
+import Preloader, { SESSION_KEY } from './components/Preloader';
 import { destroySmoothScroll, initSmoothScroll } from './lib/smoothScroll';
 
 const Projects = lazy(() => import('./components/Projects'));
@@ -37,7 +37,17 @@ function SectionFallback({ id, tag, title }: { id: string; tag: string; title: s
 
 function App() {
   const [activeSection, setActiveSection] = useState('home');
-  const [isReady, setIsReady] = useState(false);
+  const [isReady, setIsReady] = useState(() => {
+    if (typeof window === 'undefined') return false;
+    try {
+      return (
+        window.matchMedia('(prefers-reduced-motion: reduce)').matches ||
+        window.sessionStorage.getItem(SESSION_KEY) === 'true'
+      );
+    } catch {
+      return false;
+    }
+  });
   const progressRef = useRef<HTMLDivElement>(null);
   const sectionOffsetsRef = useRef<{ id: string; top: number }[]>([]);
 

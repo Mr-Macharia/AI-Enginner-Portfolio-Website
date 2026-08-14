@@ -5,10 +5,11 @@ interface PreloaderProps {
   onComplete: () => void;
 }
 
-const SESSION_KEY = 'gm-portfolio-preloader-seen';
+export const SESSION_KEY = 'gm-portfolio-preloader-seen';
 
 const Preloader = ({ onComplete }: PreloaderProps) => {
   const rootRef = useRef<HTMLDivElement>(null);
+  const completedRef = useRef(false);
 
   useEffect(() => {
     if (typeof window === 'undefined') {
@@ -16,30 +17,50 @@ const Preloader = ({ onComplete }: PreloaderProps) => {
       return;
     }
 
+    const finish = () => {
+      if (completedRef.current) return;
+      completedRef.current = true;
+      try {
+        window.sessionStorage.setItem(SESSION_KEY, 'true');
+      } catch {
+        // Ignore storage errors in private browsing
+      }
+      onComplete();
+    };
+
     const prefersReducedMotion = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
     const hasSeenPreloader = window.sessionStorage.getItem(SESSION_KEY) === 'true';
 
     if (prefersReducedMotion || hasSeenPreloader) {
-      onComplete();
+      finish();
       return;
     }
 
     const root = rootRef.current;
-
     if (!root) {
-      onComplete();
+      finish();
       return;
     }
 
+    // Safety fallback timeout to ensure the portfolio never stays stuck
+    const safetyTimer = setTimeout(finish, 1500);
+
     const lines = Array.from(root.querySelectorAll('.preloader-line'));
     const panel = root.querySelector('.preloader-panel');
+
+    const isMobile = window.innerWidth <= 768;
+    const lineDuration = isMobile ? 0.35 : 0.45;
+    const stagger = isMobile ? 0.04 : 0.05;
+    const holdTime = isMobile ? '+=0.1' : '+=0.18';
+    const outDuration = isMobile ? 0.25 : 0.35;
+    const panelDuration = isMobile ? 0.35 : 0.45;
 
     const ctx = gsap.context(() => {
       const timeline = gsap.timeline({
         defaults: { ease: 'power3.out' },
         onComplete: () => {
-          window.sessionStorage.setItem(SESSION_KEY, 'true');
-          onComplete();
+          clearTimeout(safetyTimer);
+          finish();
         },
       });
 
@@ -49,28 +70,31 @@ const Preloader = ({ onComplete }: PreloaderProps) => {
         .to(lines, {
           yPercent: 0,
           opacity: 1,
-          duration: 1,
-          stagger: 0.08,
+          duration: lineDuration,
+          stagger,
         })
         .to(lines, {
           yPercent: -110,
           opacity: 0,
-          duration: 0.4,
-          stagger: 0.05,
-        }, '+=0.3')
+          duration: outDuration,
+          stagger: 0.03,
+        }, holdTime)
         .to(panel, {
           yPercent: -100,
-          duration: 0.6,
-          ease: 'power4.inOut',
-        }, '-=0.1')
+          duration: panelDuration,
+          ease: 'power3.inOut',
+        }, '-=0.08')
         .to(root, {
           opacity: 0,
-          duration: 0.2,
+          duration: 0.15,
           pointerEvents: 'none',
-        }, '-=0.2');
+        }, '-=0.15');
     }, rootRef);
 
-    return () => ctx.revert();
+    return () => {
+      clearTimeout(safetyTimer);
+      ctx.revert();
+    };
   }, [onComplete]);
 
   return (
