@@ -529,16 +529,7 @@ ul {
   will-change: width;
 }
 
-.scroll-progress:not(.is-ready) {
-  opacity: 0;
-}
-
 .app-shell {
-  opacity: 0;
-  transition: opacity 0.45s ease;
-}
-
-.app-shell.is-ready {
   opacity: 1;
 }
 

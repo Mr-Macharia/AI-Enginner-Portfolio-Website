@@ -142,39 +142,27 @@ const Hero = ({ isReady }: { isReady: boolean }) => {
 
     const ctx = gsap.context(() => {
       const tl = gsap.timeline({
-        defaults: { ease: 'power4.out', duration: 1 },
+        defaults: { ease: 'power3.out', duration: 0.5 },
       });
 
-      // Start state set synchronously before render frame paint
-      gsap.set('.hero-badge, .hero-title, .hero-description, .hero-marquee-shell, .hero-cta, .hero-socials', {
+      tl.from('.hero-badge, .hero-title, .hero-description, .hero-marquee-shell, .hero-cta, .hero-socials', {
         opacity: 0,
-        y: 35
-      });
-      gsap.set('.hero-visual', {
-        opacity: 0,
-        x: 45
-      });
-      gsap.set('.scroll-indicator', {
-        opacity: 0
-      });
-
-      // Animated entry timeline sequence
-      tl.to('.hero-badge, .hero-title, .hero-description, .hero-marquee-shell, .hero-cta, .hero-socials', {
-        opacity: 1,
-        y: 0,
-        stagger: 0.1,
-        duration: 0.8,
-        clearProps: 'transform'
+        y: 20,
+        stagger: 0.06,
+        duration: 0.45,
+        clearProps: 'transform,opacity'
       })
-      .to('.hero-visual', {
-        opacity: 1,
-        x: 0,
-        duration: 1.1
-      }, '-=0.6')
-      .to('.scroll-indicator', {
-        opacity: 1,
-        duration: 0.8
-      }, '-=0.4');
+      .from('.hero-visual', {
+        opacity: 0,
+        x: 25,
+        duration: 0.55,
+        clearProps: 'transform,opacity'
+      }, '-=0.35')
+      .from('.scroll-indicator', {
+        opacity: 0,
+        duration: 0.4,
+        clearProps: 'opacity'
+      }, '-=0.2');
     });
 
     return () => ctx.revert();
@@ -186,7 +174,7 @@ const Hero = ({ isReady }: { isReady: boolean }) => {
   };
 
   return (
-    <section className="hero" id="home" style={{ opacity: isReady ? 1 : 0, transition: 'opacity 0.3s ease' }}>
+    <section className="hero" id="home">
       <div className="hero-wrapper">
         {/* ── Left column ── */}
         <div className="hero-content">

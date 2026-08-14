@@ -9,7 +9,6 @@ import Footer from './components/Footer';
 import BackToTop from './components/BackToTop';
 import CustomCursor from './components/CustomCursor';
 import GrainOverlay from './components/GrainOverlay';
-import Preloader, { SESSION_KEY } from './components/Preloader';
 import { destroySmoothScroll, initSmoothScroll } from './lib/smoothScroll';
 
 const Projects = lazy(() => import('./components/Projects'));
@@ -37,25 +36,10 @@ function SectionFallback({ id, tag, title }: { id: string; tag: string; title: s
 
 function App() {
   const [activeSection, setActiveSection] = useState('home');
-  const [isReady, setIsReady] = useState(() => {
-    if (typeof window === 'undefined') return false;
-    try {
-      return (
-        window.matchMedia('(prefers-reduced-motion: reduce)').matches ||
-        window.sessionStorage.getItem(SESSION_KEY) === 'true'
-      );
-    } catch {
-      return false;
-    }
-  });
   const progressRef = useRef<HTMLDivElement>(null);
   const sectionOffsetsRef = useRef<{ id: string; top: number }[]>([]);
 
   useEffect(() => {
-    if (!isReady) {
-      return;
-    }
-
     const cacheSectionOffsets = () => {
       const sections = document.querySelectorAll('section[id]');
       const offsets: { id: string; top: number }[] = [];
@@ -123,19 +107,18 @@ function App() {
       window.removeEventListener('scroll', handleScroll);
       window.removeEventListener('resize', cacheSectionOffsets);
     };
-  }, [isReady]);
+  }, []);
 
   return (
     <>
-      {!isReady ? <Preloader onComplete={() => setIsReady(true)} /> : null}
-      <div ref={progressRef} className={`scroll-progress ${isReady ? 'is-ready' : ''}`} />
+      <div ref={progressRef} className="scroll-progress is-ready" />
       <Background />
       <GrainOverlay />
       <CustomCursor />
-      <div className={`app-shell ${isReady ? 'is-ready' : ''}`}>
+      <div className="app-shell is-ready">
         <Navbar activeSection={activeSection} />
         <main>
-          <Hero isReady={isReady} />
+          <Hero isReady={true} />
           <About />
           <Skills />
           <Suspense fallback={<SectionFallback id="projects" tag="Portfolio" title="Recent Projects" />}>

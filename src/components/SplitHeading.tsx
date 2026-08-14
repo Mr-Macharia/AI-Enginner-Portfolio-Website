@@ -33,19 +33,18 @@ const SplitHeading = ({ as: Tag = 'h2', className, text, delay = 0, once = true 
     }
 
     const ctx = gsap.context(() => {
-      gsap.set(words, { yPercent: 115, opacity: 0, rotateZ: 2, transformOrigin: '0% 100%' });
-
-      gsap.to(words, {
-        yPercent: 0,
-        opacity: 1,
-        rotateZ: 0,
+      gsap.from(words, {
+        yPercent: 60,
+        opacity: 0,
+        rotateZ: 1,
+        transformOrigin: '0% 100%',
         ease: 'power3.out',
-        duration: 0.9,
+        duration: 0.5,
         delay,
-        stagger: 0.08,
+        stagger: 0.04,
         scrollTrigger: {
           trigger: element,
-          start: 'top 82%',
+          start: 'top 90%',
           once,
         },
       });
