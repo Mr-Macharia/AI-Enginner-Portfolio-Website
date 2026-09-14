@@ -28,8 +28,14 @@ export const ScrollReveal = ({ children, delay = 0, direction = 'up' }: ScrollRe
       return;
     }
 
-    const offset = directionOffset[direction];
     const isMobile = window.matchMedia('(max-width: 768px)').matches;
+
+    // Horizontal reveals translate a full-width wrapper sideways, which sticks
+    // out past the viewport until the trigger fires and causes a horizontal
+    // scrollbar on narrow screens. Reveal upward instead on mobile.
+    const resolvedDirection =
+      isMobile && (direction === 'left' || direction === 'right') ? 'up' : direction;
+    const offset = directionOffset[resolvedDirection];
 
     const ctx = gsap.context(() => {
       // Initialize element styles to prevent flashes before execution

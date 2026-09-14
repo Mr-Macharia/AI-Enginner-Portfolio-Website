@@ -160,3 +160,12 @@
   overflow: auto;
   z-index: 1;
 }
+
+/* The edge glow is driven by cursor proximity and extends 40px beyond the card
+   via a negative inset, which pushes past the viewport on small screens.
+   Touch devices have no hover to drive it, so drop it entirely there. */
+@media (hover: none), (max-width: 768px) {
+  .border-glow-card > .edge-light {
+    display: none;
+  }
+}

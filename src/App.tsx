@@ -7,9 +7,12 @@ import About from './components/About';
 import Skills from './components/Skills';
 import Footer from './components/Footer';
 import BackToTop from './components/BackToTop';
-import CustomCursor from './components/CustomCursor';
 import GrainOverlay from './components/GrainOverlay';
 import { destroySmoothScroll, initSmoothScroll } from './lib/smoothScroll';
+
+// Desktop-only pointer effect: keep it (and its GSAP dependency) off the
+// critical path so touch devices never download it.
+const CustomCursor = lazy(() => import('./components/CustomCursor'));
 
 const Projects = lazy(() => import('./components/Projects'));
 const Experience = lazy(() => import('./components/Experience'));
@@ -36,8 +39,17 @@ function SectionFallback({ id, tag, title }: { id: string; tag: string; title: s
 
 function App() {
   const [activeSection, setActiveSection] = useState('home');
+  const [canHover, setCanHover] = useState(false);
   const progressRef = useRef<HTMLDivElement>(null);
   const sectionOffsetsRef = useRef<{ id: string; top: number }[]>([]);
+
+  useEffect(() => {
+    const pointerQuery = window.matchMedia('(pointer: fine)');
+    const sync = () => setCanHover(pointerQuery.matches);
+    sync();
+    pointerQuery.addEventListener('change', sync);
+    return () => pointerQuery.removeEventListener('change', sync);
+  }, []);
 
   useEffect(() => {
     const cacheSectionOffsets = () => {
@@ -81,31 +93,39 @@ function App() {
       }
     };
 
-    const lenis = initSmoothScroll();
-
-    if (lenis) {
-      const onLenisScroll = ({ scroll }: { scroll: number }) => {
-        updateScrollState(scroll);
-      };
-
-      lenis.on('scroll', onLenisScroll);
-      updateScrollState(lenis.scroll);
-
-      return () => {
-        lenis.off('scroll', onLenisScroll);
-        window.removeEventListener('resize', cacheSectionOffsets);
-        destroySmoothScroll();
-      };
-    }
-
+    // Track scroll natively right away; Lenis (desktop only) is loaded async
+    // and takes over once ready, so scrolling works during that gap.
     const handleScroll = () => updateScrollState(window.scrollY);
-
     window.addEventListener('scroll', handleScroll, { passive: true });
     updateScrollState(window.scrollY);
 
+    let cancelled = false;
+    let detachLenis: (() => void) | null = null;
+
+    initSmoothScroll().then((lenis) => {
+      if (!lenis) return;
+      if (cancelled) {
+        destroySmoothScroll();
+        return;
+      }
+
+      const onLenisScroll = ({ scroll }: { scroll: number }) => updateScrollState(scroll);
+
+      window.removeEventListener('scroll', handleScroll);
+      lenis.on('scroll', onLenisScroll);
+      updateScrollState(lenis.scroll);
+
+      detachLenis = () => {
+        lenis.off('scroll', onLenisScroll);
+        destroySmoothScroll();
+      };
+    });
+
     return () => {
+      cancelled = true;
       window.removeEventListener('scroll', handleScroll);
       window.removeEventListener('resize', cacheSectionOffsets);
+      detachLenis?.();
     };
   }, []);
 
@@ -114,7 +134,11 @@ function App() {
       <div ref={progressRef} className="scroll-progress is-ready" />
       <Background />
       <GrainOverlay />
-      <CustomCursor />
+      {canHover && (
+        <Suspense fallback={null}>
+          <CustomCursor />
+        </Suspense>
+      )}
       <div className="app-shell is-ready">
         <Navbar activeSection={activeSection} />
         <main>

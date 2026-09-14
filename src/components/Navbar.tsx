@@ -60,7 +60,7 @@ const Navbar = ({ activeSection }: NavbarProps) => {
         <div className="nav-container">
           {/* Logo */}
           <a href="#home" className="nav-logo" onClick={(event) => handleNavClick(event, '#home')}>
-            <img src={webLogo} alt="GM Logo" className="logo-img" />
+            <img src={webLogo} alt="GM Logo" className="logo-img" width="36" height="36" decoding="async" fetchPriority="high" />
           </a>
 
           {/* Desktop nav links with animated active pill */}

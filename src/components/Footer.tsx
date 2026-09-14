@@ -56,7 +56,7 @@ const Footer = () => {
         <div className="logo-track">
           {track.map((item, idx) => (
             <div className="logo-item" key={idx}>
-              <img src={item.src} alt={item.label} />
+              <img src={item.src} alt={item.label} loading="lazy" decoding="async" />
               <span className="logo-badge">{item.label}</span>
             </div>
           ))}
@@ -73,7 +73,7 @@ const Footer = () => {
         >
           <div className="footer-brand">
             <a href="#home" className="nav-logo" onClick={(event) => handleFooterJump(event, '#home')}>
-              <img src={webLogo} alt="GM Logo" className="logo-img" />
+              <img src={webLogo} alt="GM Logo" className="logo-img" loading="lazy" decoding="async" />
             </a>
             <p>AI/ML Engineer &amp; Data Scientist building intelligent systems in Nairobi, Kenya 🇰🇪</p>
           </div>

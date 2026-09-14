@@ -86,3 +86,11 @@ html:not(.dark) .electric-border:hover {
               0 0 16px 4px color-mix(in srgb, var(--accent-primary) 40%, transparent);
   transition: box-shadow 0.3s ease;
 }
+
+/* scale(1.1) pushes this decorative glow ~10% beyond the card, which clears the
+   viewport edge on narrow screens. Keep it inside the card on mobile. */
+@media (max-width: 768px) {
+  .eb-background-glow {
+    transform: none;
+  }
+}

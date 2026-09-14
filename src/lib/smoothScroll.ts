@@ -1,6 +1,6 @@
 import gsap from 'gsap';
 import { ScrollTrigger } from 'gsap/ScrollTrigger';
-import Lenis from 'lenis';
+import type Lenis from 'lenis';
 
 let lenisInstance: Lenis | null = null;
 let cleanupTicker: (() => void) | null = null;
@@ -10,6 +10,20 @@ function prefersReducedMotion() {
   return typeof window !== 'undefined' && window.matchMedia('(prefers-reduced-motion: reduce)').matches;
 }
 
+// Lenis runs with syncTouch disabled, so on touch devices it hands scrolling
+// back to the browser anyway — all it adds there is a per-frame RAF loop that
+// competes with native momentum scrolling. Skip it and use native scroll.
+// `any-pointer: fine` keeps hybrid laptops (touchscreen + trackpad) on Lenis,
+// and an unknown/absent pointer falls through to Lenis rather than being
+// misread as touch.
+function isTouchPrimary() {
+  if (typeof window === 'undefined') return false;
+  return (
+    window.matchMedia('(pointer: coarse)').matches &&
+    !window.matchMedia('(any-pointer: fine)').matches
+  );
+}
+
 function ensureGsapSetup() {
   if (!isRegistered) {
     gsap.registerPlugin(ScrollTrigger);
@@ -17,18 +31,33 @@ function ensureGsapSetup() {
   }
 }
 
-export function initSmoothScroll() {
-  if (typeof window === 'undefined' || prefersReducedMotion()) {
+/**
+ * Loads Lenis only when this device will actually use it, so touch devices
+ * never pay for the download. Resolves to null when native scrolling is used.
+ */
+export async function initSmoothScroll(): Promise<Lenis | null> {
+  if (typeof window === 'undefined' || prefersReducedMotion() || isTouchPrimary()) {
+    // ScrollTrigger still drives the reveal animations on native scroll.
+    ensureGsapSetup();
     return null;
   }
 
+  if (lenisInstance) {
+    return lenisInstance;
+  }
+
+  const { default: LenisCtor } = await import('lenis');
+  return createSmoothScroll(LenisCtor);
+}
+
+function createSmoothScroll(LenisCtor: typeof Lenis) {
   ensureGsapSetup();
 
   if (lenisInstance) {
     return lenisInstance;
   }
 
-  const lenis = new Lenis({
+  const lenis = new LenisCtor({
     duration: 1.15,
     smoothWheel: true,
     syncTouch: false,

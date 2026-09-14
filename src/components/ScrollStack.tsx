@@ -1,5 +1,5 @@
 import { useLayoutEffect, useRef, useCallback, type ReactNode } from 'react';
-import Lenis from 'lenis';
+import type Lenis from 'lenis';
 import './ScrollStack.css';
 import { getLenis } from '../lib/smoothScroll';
 
@@ -263,31 +263,36 @@ const ScrollStack = ({
       const scroller = scrollerRef.current;
       if (!scroller) return;
 
-      const lenis = new Lenis({
-        wrapper: scroller,
-        content: scroller.querySelector('.scroll-stack-inner') as HTMLElement,
-        duration: 1.2,
-        easing: t => Math.min(1, 1.001 - Math.pow(2, -10 * t)),
-        smoothWheel: true,
-        touchMultiplier: 2,
-        infinite: false,
-        gestureOrientation: 'vertical',
-        wheelMultiplier: 1,
-        lerp: 0.1,
-        syncTouch: true,
-        syncTouchLerp: 0.075
+      // Only reachable for the non-window-scroll variant; load Lenis on demand
+      // so it stays out of the initial bundle.
+      void import('lenis').then(({ default: Lenis }) => {
+        const lenis = new Lenis({
+          wrapper: scroller,
+          content: scroller.querySelector('.scroll-stack-inner') as HTMLElement,
+          duration: 1.2,
+          easing: t => Math.min(1, 1.001 - Math.pow(2, -10 * t)),
+          smoothWheel: true,
+          touchMultiplier: 2,
+          infinite: false,
+          gestureOrientation: 'vertical',
+          wheelMultiplier: 1,
+          lerp: 0.1,
+          syncTouch: true,
+          syncTouchLerp: 0.075
+        });
+
+        lenis.on('scroll', handleScroll);
+
+        const raf = (time: number) => {
+          lenis.raf(time);
+          animationFrameRef.current = requestAnimationFrame(raf);
+        };
+        animationFrameRef.current = requestAnimationFrame(raf);
+
+        lenisRef.current = lenis;
       });
 
-      lenis.on('scroll', handleScroll);
-
-      const raf = (time: number) => {
-        lenis.raf(time);
-        animationFrameRef.current = requestAnimationFrame(raf);
-      };
-      animationFrameRef.current = requestAnimationFrame(raf);
-
-      lenisRef.current = lenis;
-      return lenis;
+      return null;
     }
   }, [handleScroll, useWindowScroll]);
 

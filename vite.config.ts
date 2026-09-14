@@ -27,7 +27,13 @@ export default defineConfig({
             return 'motion-vendor';
           }
 
-          if (id.includes('gsap') || id.includes('lenis')) {
+          // Keep lenis in its own chunk: it is imported dynamically and only
+          // fetched on pointer devices, so it must not be bundled with gsap.
+          if (id.includes('lenis')) {
+            return 'lenis-vendor';
+          }
+
+          if (id.includes('gsap')) {
             return 'scroll-vendor';
           }
 
