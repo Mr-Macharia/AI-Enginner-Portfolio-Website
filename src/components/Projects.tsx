@@ -60,7 +60,7 @@ const projects = [
     title: 'Chalrose Pharmacy',
     description: 'E-commerce platform for a pharmacy featuring a digital storefront, medication catalog, shopping cart, and a sleek, user-friendly responsive dashboard.',
     tech: ['TypeScript', 'Next.js', 'React', 'Tailwind CSS'],
-    live: 'https://pharmacy-chalrose.vercel.app',
+    live: 'https://www.chalrose-pharmaceuticals.co.ke/',
     github: 'https://github.com/Mr-Macharia/pharmacy',
   },
   {
@@ -102,7 +102,7 @@ const projects = [
     title: 'Gigi Hygiene',
     description: 'Modern e-commerce storefront for personal care products with product catalog, shopping cart, and performance-optimized responsive UI built with React and Vite.',
     tech: ['React', 'TypeScript', 'Vite', 'Tailwind CSS'],
-    live: 'https://gigi-hygiene.vercel.app',
+    live: 'https://gigihygiene.co.ke',
     github: 'https://github.com/Mr-Macharia/gigi_hygiene',
   },
   {

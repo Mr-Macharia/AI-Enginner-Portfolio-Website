@@ -218,7 +218,7 @@ Collected, cleaned, and validated data from national and community field project
 
 - **Tech Stack:** TypeScript, Next.js, React, Tailwind CSS
 - **Description:** Full-stack e-commerce web application featuring medication catalogs, cart checkouts, and a secure dashboard for prescription management.
-- **Live Demo:** [pharmacy-chalrose.vercel.app](https://pharmacy-chalrose.vercel.app)
+- **Live Demo:** [chalrose-pharmaceuticals.co.ke](https://www.chalrose-pharmaceuticals.co.ke/)
 - **Repository:** [pharmacy](https://github.com/Mr-Macharia/pharmacy)
 
 ### 10. **Microsoft Movie Data Analysis**
@@ -245,7 +245,7 @@ Collected, cleaned, and validated data from national and community field project
 
 - **Tech Stack:** React, TypeScript, Vite, Tailwind CSS
 - **Description:** Modern e-commerce storefront for personal care products with product catalog, shopping cart, and performance-optimized responsive UI built with React and Vite.
-- **Live Demo:** [gigi-hygiene.vercel.app](https://gigi-hygiene.vercel.app)
+- **Live Demo:** [gigihygiene.co.ke](https://gigihygiene.co.ke)
 - **Repository:** [gigi_hygiene](https://github.com/Mr-Macharia/gigi_hygiene)
 
 ### 13. **Granite AI Agents**
