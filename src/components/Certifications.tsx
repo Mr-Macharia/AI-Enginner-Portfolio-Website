@@ -1,178 +1,208 @@
-import './Certifications.css';
-import ScrollReveal from './ScrollReveal';
-import ElectricBorder from './ElectricBorder';
-import SplitHeading from './SplitHeading';
-import useTilt from '../hooks/useTilt';
+import { useEffect, useRef, useState, type PointerEvent as RPointerEvent } from 'react';
+import gsap from 'gsap';
+import { ScrollTrigger } from 'gsap/ScrollTrigger';
+import { useGSAP } from '@gsap/react';
+import { ArrowLeft, ArrowRight, BadgeCheck, Check, Copy } from 'lucide-react';
+import { credentials, issuerColors, skills, type Credential, type SkillId } from '../data/credentials';
 
-interface Badge {
-  name: string;
-  issuer: string;
-  date: string;
-  color: string;
-  credentialId?: string;
-  description?: string;
-}
+gsap.registerPlugin(ScrollTrigger, useGSAP);
 
-interface SkillCategory {
-  name: string;
-  description: string;
-  tags: string[];
-  badges: Badge[];
-}
+const skillLabel = Object.fromEntries(skills.map((s) => [s.id, s.label])) as Record<SkillId, string>;
+const initials = (issuer: string) =>
+  issuer.replace(/[^A-Za-z ]/g, ' ').split(/\s+/).filter(Boolean).slice(0, 2).map((w) => w[0]).join('').toUpperCase();
+const pad = (n: number) => String(n).padStart(2, '0');
+const sorted = [...credentials].sort((a, b) => b.issued.localeCompare(a.issued));
+const issuerCount = new Set(credentials.map((c) => c.issuer)).size;
+const withIds = credentials.filter((c) => c.credentialId).length;
 
-const skillCategories: SkillCategory[] = [
-  {
-    name: "Artificial Intelligence (AI)",
-    description: "Artificial Intelligence (AI) involves applying methods that simulate human-intelligence processes such as learning, reasoning, and pattern recognition to allow systems to generate predictions or responses. It is useful in automating processes, improving decision-making, and increasing efficiency across various applications.",
-    tags: ["IN DEMAND", "FUTURE PROOF"],
-    badges: [
-      { name: "AI Automation Engineering", issuer: "ONE DEV", date: "Nov 2025", color: "orange", description: "A course on planning and orchestration of AI Automation Systems." },
-      { name: "AI Skills badge 2025-26", issuer: "Microsoft Elevate", date: "Jan 31, 2026", color: "blue" },
-      { name: "Prompt Design in Vertex AI Skill Badge", issuer: "Google Cloud", date: "Nov 16, 2025", color: "orange" },
-      { name: "Building AI-Powered Search with MongoDB Vector Search", issuer: "MongoDB", date: "Oct 31, 2025", color: "green" }
-    ]
-  },
-  {
-    name: "Generative AI",
-    description: "Generative AI refers to the branch of artificial intelligence focused on creating new content, such as text, images, or music, by learning from existing data and patterns. It is useful in automating creative processes and enhancing content generation in various fields.",
-    tags: ["IN DEMAND"],
-    badges: [
-      { name: "Agent Memory: Building Memory-Aware Agents", issuer: "DeepLearning.AI", date: "Jul 2026", color: "purple", credentialId: "33ddbdf9-3e1e-4e15-a83e-d6d7a347646f" },
-      { name: "AI Skills badge 2025-26", issuer: "Microsoft Elevate", date: "Jan 31, 2026", color: "blue" },
-      { name: "Prompt Design in Vertex AI Skill Badge", issuer: "Google Cloud", date: "Nov 16, 2025", color: "orange" }
-    ]
-  },
-  {
-    name: "Data Science",
-    description: "Data Science covers the end-to-end process of data collection, preprocessing, exploratory data analysis, visualization, and building predictive models to extract actionable insights from structured and unstructured data.",
-    tags: ["IN DEMAND"],
-    badges: [
-      { name: "Data and AI", issuer: "Cyber Shujaa", date: "Aug 2025", color: "green", credentialId: "CS2025-DN2508240728415637", description: "A program that expounds on Data science and Artificial Intelligence." },
-      { name: "Data Science", issuer: "Moringa School", date: "Jun 2024", color: "green", description: "A program that includes the professional application of Data Analysis and Visualization and Machine Learning" }
-    ]
-  },
-  {
-    name: "Leadership & Professional Development",
-    description: "Professional development and leadership training programs designed to enhance collaboration, strategic management, communication, and AI-augmented workplace efficiency.",
-    tags: [],
-    badges: [
-      { name: "Leading Young Elevate", issuer: "Leading Young", date: "Nov 2024", color: "orange", description: "A program that nurtures leadership in youth." },
-      { name: "AI Career Essentials", issuer: "alx_africa", date: "Jul 2024", color: "blue", description: "An 8 week course on AI Augmented Professional Development Skills in the Digital Age" }
-    ]
-  },
-  {
-    name: "Cloud Computing",
-    description: "Cloud computing refers to the delivery of computing services, including storage, processing, and networking, over the internet. It is useful for enabling scalable and flexible resource management in various work contexts.",
-    tags: ["IN DEMAND"],
-    badges: [
-      { name: "Implement Load Balancing on Compute Engine Skill Badge", issuer: "Google Cloud", date: "Nov 9, 2025", color: "orange" },
-      { name: "Set Up an App Dev Environment on Google Cloud Skill Badge", issuer: "Google Cloud", date: "Nov 15, 2025", color: "orange" }
-    ]
-  },
-  {
-    name: "MongoDB",
-    description: "MongoDB is a source-available cross-platform document-oriented database program. Understanding of MongoDB is useful for managing and storing data in a flexible, scalable manner across various platforms.",
-    tags: ["FUTURE PROOF"],
-    badges: [
-      { name: "Building RAG Apps Using MongoDB", issuer: "MongoDB", date: "Oct 31, 2025", color: "green" },
-      { name: "Building AI-Powered Search with MongoDB Vector Search", issuer: "MongoDB", date: "Oct 31, 2025", color: "green" }
-    ]
-  },
-  {
-    name: "Machine Learning (ML)",
-    description: "Machine Learning (ML) involves developing algorithms that enable systems to learn from data and improve over time. It is useful for automating decision-making processes and enhancing data-driven insights in various applications.",
-    tags: ["IN DEMAND", "FUTURE PROOF"],
-    badges: [
-      { name: "Prepare Data for ML APIs on Google Cloud Skill Badge", issuer: "Google Cloud", date: "Nov 16, 2025", color: "orange" }
-    ]
-  },
-  {
-    name: "Search Algorithms",
-    description: "Search algorithms refer to methods used to locate specific data within a dataset, relevant in organizing and retrieving information in Knowledge Management, Library, Information, and Archival Studies.",
-    tags: [],
-    badges: [
-      { name: "Building AI-Powered Search with MongoDB Vector Search", issuer: "MongoDB", date: "Oct 31, 2025", color: "green" }
-    ]
-  },
-  {
-    name: "TensorFlow",
-    description: "TensorFlow is a free and open-source software library for machine learning and artificial intelligence. Understanding of TensorFlow is useful for developing and deploying machine learning models and neural networks.",
-    tags: ["IN DEMAND", "FUTURE PROOF"],
-    badges: [
-      { name: "Prepare Data for ML APIs on Google Cloud Skill Badge", issuer: "Google Cloud", date: "Nov 16, 2025", color: "orange" }
-    ]
-  }
-];
+/** Desktop with motion allowed: cards run as a continuous loop instead of a swipe deck. */
+const LOOP_QUERY = '(min-width: 1024px) and (prefers-reduced-motion: no-preference)';
+const useLoopMode = () => {
+  const [on, setOn] = useState(() => typeof window !== 'undefined' && window.matchMedia(LOOP_QUERY).matches);
+  useEffect(() => {
+    const mq = window.matchMedia(LOOP_QUERY);
+    const sync = () => setOn(mq.matches);
+    mq.addEventListener('change', sync);
+    return () => mq.removeEventListener('change', sync);
+  }, []);
+  return on;
+};
 
-function CertCategoryCard({ category }: { category: SkillCategory }) {
-  const cardRef = useTilt<HTMLDivElement>({ maxRotation: 8, scale: 1.012 });
-
+function CopyId({ id }: { id: string }) {
+  const [copied, setCopied] = useState(false);
+  const copy = async () => {
+    try {
+      await navigator.clipboard.writeText(id);
+      setCopied(true);
+      setTimeout(() => setCopied(false), 1600);
+    } catch { /* clipboard unavailable: ID stays visible and selectable */ }
+  };
   return (
-    <div ref={cardRef} className="cert-category-card glass-card" data-cursor-label="Info">
-      <div className="category-header">
-        <h3>{category.name}</h3>
-      </div>
-      <p className="category-description">{category.description}</p>
-      
-      <div className="badges-container">
-        <h4 className="badges-title">Credentials & Certificates</h4>
-        <div className="badges-list">
-          {category.badges.map((badge, bIndex) => (
-            <div className="badge-item" key={`${category.name}-badge-${bIndex}`}>
-              <div className={`badge-icon ${badge.color}`}>
-                {badge.color === 'blue' && (
-                  <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M22 12h-4l-3 9L9 3l-3 9H2"/></svg>
-                )}
-                {badge.color === 'orange' && (
-                  <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M17.5 19v-2a4 4 0 0 0-4-4h-8a4 4 0 0 0-4 4v2"/><circle cx="7.5" cy="8" r="4"/><path d="M22 19v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/></svg>
-                )}
-                {badge.color === 'green' && (
-                  <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><rect x="2" y="4" width="20" height="16" rx="2" ry="2"/><path d="M6 8h.01"/><path d="M10 8h.01"/><path d="M14 8h.01"/></svg>
-                )}
-                {badge.color === 'purple' && (
-                  <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><circle cx="12" cy="8" r="7"/><polyline points="8.21 13.89 7 23 12 20 17 23 15.79 13.88"/></svg>
-                )}
-              </div>
-              <div className="badge-info">
-                <h5>{badge.name}</h5>
-                <span>{badge.issuer} • Issued {badge.date}</span>
-                {badge.description && (
-                  <p className="badge-description">{badge.description}</p>
-                )}
-                {badge.credentialId && (
-                  <span className="credential-id">ID: {badge.credentialId}</span>
-                )}
-              </div>
+    <button type="button" className={`cc-id${copied ? ' is-copied' : ''}`} onClick={copy}>
+      <span className="cc-id-text">{id}</span>
+      {copied ? <Check size={13} aria-hidden="true" /> : <Copy size={13} aria-hidden="true" />}
+      <span className="sr-only" aria-live="polite">{copied ? 'Copied' : 'Copy credential ID'}</span>
+    </button>
+  );
+}
+
+/** One credential, rendered as a physical card: security-paper pattern, holographic foil that follows the pointer. */
+function CredCard({ c, n, ghost = false }: { c: Credential; n: number; ghost?: boolean }) {
+  const color = issuerColors[c.issuer] ?? '#e85d04';
+  const onMove = (e: RPointerEvent<HTMLElement>) => {
+    if (e.pointerType !== 'mouse') return;
+    const el = e.currentTarget;
+    const r = el.getBoundingClientRect();
+    const px = (e.clientX - r.left) / r.width;
+    const py = (e.clientY - r.top) / r.height;
+    el.style.setProperty('--px', `${px * 100}%`);
+    el.style.setProperty('--py', `${py * 100}%`);
+    el.style.setProperty('--rx', `${(0.5 - py) * 10}deg`);
+    el.style.setProperty('--ry', `${(px - 0.5) * 12}deg`);
+  };
+  const onLeave = (e: RPointerEvent<HTMLElement>) => {
+    e.currentTarget.style.setProperty('--rx', '0deg');
+    e.currentTarget.style.setProperty('--ry', '0deg');
+  };
+  return (
+    <li className="cc-slot" aria-hidden={ghost || undefined} inert={ghost || undefined}>
+      <article className="cc" style={{ ['--issuer' as string]: color }} onPointerMove={onMove} onPointerLeave={onLeave}>
+        <div className="cc-face">
+          <span className="cc-guilloche" aria-hidden="true" />
+          <span className="cc-foil" aria-hidden="true" />
+          <header className="cc-top">
+            <span className="cc-emblem" aria-hidden="true">{initials(c.issuer)}</span>
+            <span className="cc-issuer">{c.issuer}</span>
+            <span className="cc-verified"><BadgeCheck size={14} aria-hidden="true" />Verified</span>
+          </header>
+          <div className="cc-mid">
+            <span className="cc-n">No. {pad(n)}</span>
+            <h3 className="cc-name">{c.name}</h3>
+          </div>
+          <ul className="cc-skills" aria-label="Skills">
+            {c.skills.map((s) => <li key={s}>{skillLabel[s]}</li>)}
+          </ul>
+          <footer className="cc-foot">
+            <div>
+              <span className="cc-label">Issued</span>
+              <time dateTime={c.issued}>{c.display}</time>
             </div>
-          ))}
+            <div className="cc-proof">
+              <span className="cc-label">{c.credentialId ? 'Credential ID' : 'Format'}</span>
+              {c.credentialId ? <CopyId id={c.credentialId} /> : <span className="cc-badge">{c.format ?? 'Digital badge'}</span>}
+            </div>
+          </footer>
         </div>
-      </div>
-    </div>
+      </article>
+    </li>
   );
 }
 
 const Certifications = () => {
-  return (
-    <section className="certifications section" id="certifications">
-      <div className="container">
-        <ScrollReveal>
-          <div className="section-header">
-            <span className="section-tag">Verified Skills</span>
-            <SplitHeading className="section-title" text="Certifications & Badges" />
-            <p className="section-subtitle">Evidenced by verified credentials and certificates</p>
-          </div>
-        </ScrollReveal>
+  const root = useRef<HTMLElement>(null);
+  const track = useRef<HTMLOListElement>(null);
+  const [skill, setSkill] = useState<SkillId | 'all'>('all');
+  const [pos, setPos] = useState(1);
+  const visible = skill === 'all' ? sorted : sorted.filter((c) => c.skills.includes(skill));
+  const countFor = (id: SkillId) => credentials.filter((c) => c.skills.includes(id)).length;
+  // A loop needs enough cards to fill the row; short filtered lists stay a static deck.
+  const loop = useLoopMode() && visible.length >= 4;
 
-        <div className="certifications-grid">
-          {skillCategories.map((category, index) => (
-            <ScrollReveal key={index} delay={index * 80}>
-              <ElectricBorder className="eb-hover-only" color="#e85d04" speed={0.8} chaos={0.1} borderRadius={20}>
-                <CertCategoryCard category={category} />
-              </ElectricBorder>
-            </ScrollReveal>
-          ))}
+  // Track which card is leading the deck for the counter + button states.
+  useEffect(() => {
+    const el = track.current;
+    if (!el) return;
+    const update = () => {
+      const card = el.querySelector<HTMLElement>('.cc-slot');
+      const step = card ? card.offsetWidth + parseFloat(getComputedStyle(el).columnGap || '0') : 1;
+      setPos(Math.min(visible.length, Math.round(el.scrollLeft / step) + 1));
+    };
+    update();
+    el.addEventListener('scroll', update, { passive: true });
+    return () => el.removeEventListener('scroll', update);
+  }, [visible.length, loop]);
+
+  const page = (dir: 1 | -1) => {
+    const el = track.current;
+    const card = el?.querySelector<HTMLElement>('.cc-slot');
+    if (!el || !card) return;
+    el.scrollBy({ left: dir * (card.offsetWidth + 20), behavior: 'smooth' });
+  };
+
+  const choose = (id: SkillId | 'all') => {
+    setSkill(id);
+    track.current?.scrollTo({ left: 0 });
+    if (!window.matchMedia('(prefers-reduced-motion: reduce)').matches) {
+      requestAnimationFrame(() => gsap.fromTo('.cc-slot', { y: 40, opacity: 0 }, { y: 0, opacity: 1, duration: 0.7, ease: 'expo.out', stagger: 0.03 }));
+    }
+  };
+
+  useGSAP(() => {
+    const mm = gsap.matchMedia();
+    mm.add('(prefers-reduced-motion: no-preference)', () => {
+      gsap.from('.cc-deck', { y: 60, opacity: 0, duration: 1.1, ease: 'expo.out', scrollTrigger: { trigger: '.cc-deck', start: 'top 85%', once: true } });
+      gsap.from('.cc-stat', { y: 30, opacity: 0, duration: 0.9, ease: 'expo.out', stagger: 0.08, scrollTrigger: { trigger: '.cc-stats', start: 'top 85%', once: true } });
+    });
+    return () => mm.revert();
+  }, { scope: root });
+
+  return (
+    <section ref={root} className="certifications section cc-section" id="certifications" data-bp="§05 — Credentials">
+      <div className="container">
+        <div className="cc-head">
+          <div>
+            <span className="section-tag">Verified skills</span>
+            <h2 className="section-title">The <span className="outline-text">receipts.</span></h2>
+            <p className="cc-lede">{credentials.length} credentials, from a JKUAT degree to Google Cloud, DeepLearning.AI and MongoDB. {withIds} carry an ID you can verify; {loop ? 'hover to pause, then click one to copy it.' : 'tap one to copy it.'}</p>
+          </div>
+          <dl className="cc-stats">
+            <div className="cc-stat"><dt>Credentials</dt><dd>{credentials.length}</dd></div>
+            <div className="cc-stat"><dt>Issuers</dt><dd>{issuerCount}</dd></div>
+            <div className="cc-stat"><dt>Latest</dt><dd>{sorted[0].display}</dd></div>
+          </dl>
+        </div>
+
+        <div className="cc-bar">
+          <div className="cc-filters" role="group" aria-label="Filter credentials by skill">
+            <button type="button" className={`wk-chip tl-chip${skill === 'all' ? ' is-active' : ''}`} aria-pressed={skill === 'all'} onClick={() => choose('all')}>
+              All<sup>{credentials.length}</sup>
+            </button>
+            {skills.map((s) => (
+              <button key={s.id} type="button" className={`wk-chip tl-chip${skill === s.id ? ' is-active' : ''}`} aria-pressed={skill === s.id} onClick={() => choose(s.id)}>
+                {s.label}<sup>{countFor(s.id)}</sup>
+              </button>
+            ))}
+          </div>
         </div>
       </div>
+
+      {loop ? (
+        <div className="cc-deck cc-loop">
+          {/* Two identical runs; the track slides by exactly one run, so the loop is seamless. */}
+          <ol className="cc-loop-track" aria-label="Credentials" style={{ ['--loop-dur' as string]: `${visible.length * 6}s` }}>
+            {visible.map((c, i) => <CredCard key={c.issuer + c.name} c={c} n={i + 1} />)}
+            {visible.map((c, i) => <CredCard key={`ghost-${c.issuer}${c.name}`} c={c} n={i + 1} ghost />)}
+          </ol>
+        </div>
+      ) : (
+        <>
+          <div className="cc-deck">
+            <ol ref={track} className="cc-track" data-lenis-prevent aria-label="Credentials">
+              {visible.map((c, i) => <CredCard key={c.issuer + c.name} c={c} n={i + 1} />)}
+              <li className="cc-tail" aria-hidden="true" />
+            </ol>
+          </div>
+
+          <div className="container cc-controls">
+            <p className="cc-count" aria-live="polite"><b>{pad(pos)}</b> / {pad(visible.length)}</p>
+            <div className="cc-progress" aria-hidden="true"><span style={{ transform: `scaleX(${visible.length ? pos / visible.length : 0})` }} /></div>
+            <div className="cc-nav">
+              <button type="button" className="cc-btn" onClick={() => page(-1)} disabled={pos <= 1} aria-label="Previous credentials"><ArrowLeft size={18} /></button>
+              <button type="button" className="cc-btn" onClick={() => page(1)} disabled={pos >= visible.length} aria-label="Next credentials"><ArrowRight size={18} /></button>
+            </div>
+          </div>
+        </>
+      )}
     </section>
   );
 };

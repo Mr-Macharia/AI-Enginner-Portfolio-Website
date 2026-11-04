@@ -1,14 +1,12 @@
-import { useEffect, useState, useRef, useCallback } from 'react';
-import { motion, useMotionValue, useSpring, useTransform } from 'framer-motion';
+import { useEffect, useState, useRef, type MouseEvent as RMouseEvent, type ReactNode } from 'react';
+import NetworkCanvas from './nx/NetworkCanvas';
 import { ArrowRight, Mail } from 'lucide-react';
 import gsap from 'gsap';
+import { ScrollTrigger } from 'gsap/ScrollTrigger';
+import { useGSAP } from '@gsap/react';
+import NairobiClock from './nx/NairobiClock';
 import Marquee from './Marquee';
 import { scrollToTarget } from '../lib/smoothScroll';
-import SplitHeading from './SplitHeading';
-import pythonLogo    from '../assets/python_logo.webp';
-import langchainLogo from '../assets/langchain_logo.webp';
-import crewaiLogo    from '../assets/crewai_logo.webp';
-import llamaindexLogo from '../assets/llamaindex_logo.webp';
 
 /* ── Typewriter hook ──────────────────────────────────────────────── */
 const PHRASES = ['AI agents', 'ML pipelines', 'GenAI solutions', 'RAG systems', 'data-driven solutions'];
@@ -57,237 +55,256 @@ function Typewriter({ phrases, enabled }: { phrases: string[]; enabled: boolean 
   return <>{typedText}</>;
 }
 
-/* ── Magnetic button hook ─────────────────────────────────────────── */
-function useMagnetic(strength = 0.35) {
-  const ref = useRef<HTMLDivElement>(null);
-  const x = useMotionValue(0);
-  const y = useMotionValue(0);
-  const sx = useSpring(x, { stiffness: 200, damping: 20 });
-  const sy = useSpring(y, { stiffness: 200, damping: 20 });
+gsap.registerPlugin(ScrollTrigger, useGSAP);
 
-  const onMove = useCallback((e: React.MouseEvent<HTMLDivElement>) => {
-    if (!ref.current) return;
-    const rect = ref.current.getBoundingClientRect();
-    const cx = rect.left + rect.width  / 2;
-    const cy = rect.top  + rect.height / 2;
-    x.set((e.clientX - cx) * strength);
-    y.set((e.clientY - cy) * strength);
-  }, [x, y, strength]);
-
-  const onLeave = useCallback(() => { x.set(0); y.set(0); }, [x, y]);
-
-  return { ref, sx, sy, onMove, onLeave };
+/* ── Magnetic wrapper (fine pointers only) ───────────────────────── */
+function Magnetic({ children, strength = 0.35 }: { children: ReactNode; strength?: number }) {
+  const ref = useRef<HTMLSpanElement>(null);
+  const to = useRef<{ x: gsap.QuickToFunc; y: gsap.QuickToFunc } | null>(null);
+  useGSAP(() => {
+    to.current = {
+      x: gsap.quickTo(ref.current, 'x', { duration: 0.6, ease: 'elastic.out(1, 0.4)' }),
+      y: gsap.quickTo(ref.current, 'y', { duration: 0.6, ease: 'elastic.out(1, 0.4)' }),
+    };
+  });
+  const move = (e: RMouseEvent) => {
+    if (!ref.current || !window.matchMedia('(pointer: fine)').matches) return;
+    const r = ref.current.getBoundingClientRect();
+    to.current?.x((e.clientX - (r.left + r.width / 2)) * strength);
+    to.current?.y((e.clientY - (r.top + r.height / 2)) * strength);
+  };
+  const leave = () => { to.current?.x(0); to.current?.y(0); };
+  return <span ref={ref} className="hx-mag" onMouseMove={move} onMouseLeave={leave}>{children}</span>;
 }
 
-/* ── Floating icon with mouse-parallax ──────────────────────────────*/
-function FloatIcon({
-  src, alt, className, depth,
-  mouseX, mouseY,
-}: {
-  src: string; alt: string; className: string; depth: number;
-  mouseX: ReturnType<typeof useSpring>; mouseY: ReturnType<typeof useSpring>;
-}) {
-  const tx = useTransform(mouseX, v => v * depth);
-  const ty = useTransform(mouseY, v => v * depth);
+/* ── The IDE (kept code, now a real editor with a run panel) ─────── */
+type Tok = [cls: string, text: string];
+const CODE: Tok[][] = [
+  [['kw', 'from'], ['', ' '], ['mod', 'crewai'], ['', ' '], ['kw', 'import'], ['', ' Agent, Crew']],
+  [['kw', 'from'], ['', ' '], ['mod', 'langchain'], ['', ' '], ['kw', 'import'], ['', ' LLM']],
+  [],
+  [['kw', 'class'], ['', ' '], ['cls', 'AIAssistant'], ['', ':']],
+  [['', '    '], ['kw', 'def'], ['', ' '], ['fn', '__init__'], ['', '('], ['prm', 'self'], ['', '):']],
+  [['', '        '], ['prm', 'self'], ['', '.agent = Agent(']],
+  [['', '            role='], ['str', '"AI Engineer"'], ['', ',']],
+  [['', '            goal='], ['str', '"Build intelligent systems"'], ['', ',']],
+  [['', '            backstory='], ['str', '"Expert in AI agents"']],
+  [['', '        )']],
+  [],
+  [['', '    '], ['kw', 'def'], ['', ' '], ['fn', 'execute'], ['', '('], ['prm', 'self'], ['', ', task):']],
+  [['', '        '], ['kw', 'return'], ['', ' '], ['prm', 'self'], ['', '.agent.run(task)']],
+];
+const YAML: Tok[][] = [
+  [['cls', 'crew'], ['', ':']],
+  [['', '  '], ['prm', 'name'], ['', ': '], ['str', 'gichogu-macharia']],
+  [['', '  '], ['prm', 'base'], ['', ': '], ['str', 'Nairobi, Kenya']],
+  [['', '  '], ['prm', 'agents'], ['', ':']],
+  [['', '    - '], ['prm', 'role'], ['', ': '], ['str', 'AI Engineer']],
+  [['', '      '], ['prm', 'tools'], ['', ': ['], ['mod', 'CrewAI'], ['', ', '], ['mod', 'LangChain'], ['', ', '], ['mod', 'Agno'], ['', ']']],
+  [['', '    - '], ['prm', 'role'], ['', ': '], ['str', 'ML Engineer']],
+  [['', '      '], ['prm', 'tools'], ['', ': ['], ['mod', 'TensorFlow'], ['', ', '], ['mod', 'PyTorch'], ['', ', '], ['mod', 'MLOps'], ['', ']']],
+  [['', '    - '], ['prm', 'role'], ['', ': '], ['str', 'Data Scientist']],
+  [['', '      '], ['prm', 'tools'], ['', ': ['], ['mod', 'Pandas'], ['', ', '], ['mod', 'Power BI'], ['', ', '], ['mod', 'RAG'], ['', ']']],
+  [['', '  '], ['prm', 'process'], ['', ': '], ['kw', 'sequential']],
+  [['', '  '], ['prm', 'status'], ['', ': '], ['fn', 'available_for_projects']],
+];
+const README: Tok[][] = [
+  [['h1', '# Gichogu Macharia']],
+  [],
+  [['quote', '> AI Engineer · ML Engineer · Data Scientist']],
+  [],
+  [['', 'I design multi-agent systems, ML pipelines and']],
+  [['', 'production web apps that pay for themselves.']],
+  [],
+  [['h2', '## Currently']],
+  [['', '- Lead Developer / AI Engineer @ '], ['fn', 'Visiondrill']],
+  [['', '- Independent consultant @ '], ['fn', 'Gich AI Nexus']],
+  [],
+  [['h2', '## Say hi'], ['', '  →  run '], ['str', '`contact`']],
+];
+const FILES = [
+  { name: 'ai_agent.py', lines: CODE, lang: 'Python 3.12' },
+  { name: 'crew.yaml', lines: YAML, lang: 'YAML' },
+  { name: 'README.md', lines: README, lang: 'Markdown' },
+];
+
+type Out = { cls?: string; text: string };
+const BOOT: Out[] = [
+  { cls: 'hx-cmd', text: '$ python ai_agent.py' },
+  { text: '› Agent initialised · role: AI Engineer' },
+  { text: '› Goal: Build intelligent systems' },
+  { cls: 'hx-okline', text: '✔ ready in 0.42s · try a command below' },
+];
+const COMMANDS = ['whoami', 'skills', 'projects', 'contact', 'run'];
+
+function respond(cmd: string): { lines: Out[]; jump?: string; clear?: boolean } {
+  switch (cmd) {
+    case 'help': return { lines: [{ text: `commands: ${[...COMMANDS, 'clear'].join(' · ')}` }] };
+    case 'whoami': return { lines: [{ text: 'Gichogu Macharia: AI/ML Engineer & Data Scientist, Nairobi 🇰🇪' }, { text: '2+ years shipping agents, ML pipelines and web apps.' }] };
+    case 'skills': return { lines: [{ text: 'agents   → CrewAI · LangChain · Agno · RAG' }, { text: 'ml       → TensorFlow · PyTorch · scikit-learn · MLOps' }, { text: 'data/web → Pandas · Power BI · React · FastAPI' }] };
+    case 'projects': return { lines: [{ cls: 'hx-okline', text: '✔ 15 projects found · opening the work index…' }], jump: '#projects' };
+    case 'contact': return { lines: [{ cls: 'hx-okline', text: '✔ opening contact · replies come from me personally' }], jump: '#contact' };
+    case 'run': case 'python ai_agent.py': return { lines: BOOT };
+    case 'clear': return { lines: [], clear: true };
+    default: return { lines: [{ cls: 'hx-errline', text: `command not found: ${cmd} · try 'help'` }] };
+  }
+}
+
+function IDE() {
+  const [file, setFile] = useState(0);
+  const [out, setOut] = useState<Out[]>(BOOT);
+  const [draft, setDraft] = useState('');
+  const screen = useRef<HTMLDivElement>(null);
+
+  useEffect(() => { screen.current?.scrollTo({ top: screen.current.scrollHeight }); }, [out]);
+
+  const exec = (raw: string) => {
+    const cmd = raw.trim().toLowerCase();
+    if (!cmd) return;
+    const r = respond(cmd);
+    setOut((o) => (r.clear ? [] : [...o, { cls: 'hx-cmd', text: `$ ${cmd}` }, ...r.lines]));
+    if (r.jump) setTimeout(() => scrollToTarget(r.jump!, { offset: -24 }), 650);
+  };
+
+  const f = FILES[file];
   return (
-    <motion.img
-      src={src}
-      alt={alt}
-      width="48"
-      height="48"
-      decoding="async"
-      className={`float-icon ${className}`}
-      style={{ x: tx, y: ty }}
-      animate={{ y: [0, -14, 0] }}
-      transition={{ duration: 4 + depth * 2, repeat: Infinity, ease: 'easeInOut', delay: depth }}
-    />
+    <div className="hx-ide">
+      <div className="hx-ide-bar">
+        <span className="hx-dots" aria-hidden="true"><i /><i /><i /></span>
+        <div className="hx-tabs" role="tablist" aria-label="Files">
+          {FILES.map((x, i) => (
+            <button key={x.name} type="button" role="tab" aria-selected={i === file} className={`hx-tab${i === file ? ' is-active' : ''}`} onClick={() => setFile(i)}>
+              {x.name}
+            </button>
+          ))}
+        </div>
+        <button type="button" className="hx-runbtn" onClick={() => exec('run')} aria-label="Run ai_agent.py">▶ Run</button>
+      </div>
+      <pre className="hx-code" role="tabpanel" aria-label={f.name}><code key={f.name}>
+        {f.lines.map((line, i) => (
+          <span key={i} className="hx-line">
+            {line.length ? line.map(([c, t], k) => <span key={k} className={c ? `t-${c}` : undefined}>{t}</span>) : ' '}
+          </span>
+        ))}
+      </code></pre>
+      <div className="hx-run">
+        <div ref={screen} className="hx-run-screen" aria-live="polite" data-lenis-prevent>
+          {out.map((r, i) => <p key={i} className={`hx-run-line ${r.cls ?? ''}`}>{r.text}</p>)}
+        </div>
+        <form className="hx-prompt-row" onSubmit={(e) => { e.preventDefault(); exec(draft); setDraft(''); }}>
+          <label htmlFor="hx-term" className="hx-ps">$</label>
+          <input id="hx-term" value={draft} onChange={(e) => setDraft(e.target.value)} placeholder="type a command…" autoComplete="off" spellCheck={false} aria-label="Terminal command" />
+        </form>
+        <div className="hx-cmds" role="group" aria-label="Quick commands">
+          {COMMANDS.map((c) => <button key={c} type="button" className="hx-cmdbtn" onClick={() => exec(c)}>{c}</button>)}
+        </div>
+      </div>
+    </div>
   );
 }
 
-/* ─────────────────────────────────────────────────────────────────── */
+const SOCIALS = [
+  { label: 'LinkedIn', href: 'https://linkedin.com/in/gichogu-macharia' },
+  { label: 'GitHub', href: 'https://github.com/Mr-Macharia' },
+  { label: 'Email', href: 'mailto:gichogumacharia001@gmail.com' },
+];
 
 const Hero = ({ isReady }: { isReady: boolean }) => {
-  const {
-    ref: mag1Ref,
-    sx: mag1Sx,
-    sy: mag1Sy,
-    onMove: mag1OnMove,
-    onLeave: mag1OnLeave
-  } = useMagnetic(0.4);
-  const {
-    ref: mag2Ref,
-    sx: mag2Sx,
-    sy: mag2Sy,
-    onMove: mag2OnMove,
-    onLeave: mag2OnLeave
-  } = useMagnetic(0.3);
+  const root = useRef<HTMLElement>(null);
+  const [typing, setTyping] = useState(false);
 
-  // Mouse position for parallax (raw values, normalised -1 to 1)
-  const rawX = useMotionValue(0);
-  const rawY = useMotionValue(0);
-  const mouseX = useSpring(rawX, { stiffness: 80, damping: 20 });
-  const mouseY = useSpring(rawY, { stiffness: 80, damping: 20 });
-
-  useEffect(() => {
-    const onMove = (e: MouseEvent) => {
-      rawX.set((e.clientX / window.innerWidth  - 0.5) * 40);
-      rawY.set((e.clientY / window.innerHeight - 0.5) * 40);
-    };
-    window.addEventListener('mousemove', onMove, { passive: true });
-    return () => window.removeEventListener('mousemove', onMove);
-  }, [rawX, rawY]);
-
-  useEffect(() => {
+  useGSAP(() => {
     if (!isReady) return;
+    const mm = gsap.matchMedia();
+    mm.add('(prefers-reduced-motion: no-preference)', () => {
+      const tl = gsap.timeline({ defaults: { ease: 'expo.out' }, onComplete: () => setTyping(true) });
+      tl.from('.hx-topline > *', { y: 16, opacity: 0, duration: 0.8, stagger: 0.06 })
+        .from('.hx-char', { yPercent: 115, duration: 1.2, stagger: 0.028 }, 0.1)
+        .from('.hx-greet', { y: 20, opacity: 0, duration: 0.8 }, 0.2)
+        .from('.hx-ide', { y: 80, opacity: 0, rotateX: 8, duration: 1.3 }, 0.45)
+        .from('.hx-line', { clipPath: 'inset(0 100% 0 0)', duration: 0.35, ease: 'steps(18)', stagger: 0.09 }, 0.9)
+        .from('.hx-run-line', { opacity: 0, x: -8, duration: 0.4, stagger: 0.18 }, '>-0.1')
+        .from('.hx-copy > *', { y: 24, opacity: 0, duration: 0.9, stagger: 0.07 }, 0.55)
+        .from('.hx-ticker', { opacity: 0, duration: 1 }, 1);
 
-    const ctx = gsap.context(() => {
-      const tl = gsap.timeline({
-        defaults: { ease: 'power3.out', duration: 0.5 },
-      });
-
-      tl.from('.hero-badge, .hero-title, .hero-description, .hero-marquee-shell, .hero-cta, .hero-socials', {
-        opacity: 0,
-        y: 20,
-        stagger: 0.06,
-        duration: 0.45,
-        clearProps: 'transform,opacity'
-      })
-      .from('.hero-visual', {
-        opacity: 0,
-        x: 25,
-        duration: 0.55,
-        clearProps: 'transform,opacity'
-      }, '-=0.35')
-      .from('.scroll-indicator', {
-        opacity: 0,
-        duration: 0.4,
-        clearProps: 'opacity'
-      }, '-=0.2');
+      // Scroll: the name lines drift apart; the editor floats up.
+      const st = { trigger: root.current, start: 'top top', end: 'bottom top', scrub: true };
+      gsap.to('.hx-name-1', { xPercent: -3, ease: 'none', scrollTrigger: st });
+      gsap.to('.hx-name-2', { xPercent: 3, ease: 'none', scrollTrigger: st });
+      gsap.to('.hx-ide-wrap', { yPercent: -12, ease: 'none', scrollTrigger: st });
     });
+    mm.add('(prefers-reduced-motion: reduce)', () => setTyping(true));
+    return () => mm.revert();
+  }, { scope: root, dependencies: [isReady] });
 
-    return () => ctx.revert();
-  }, [isReady]);
-
-  const handleJump = (event: React.MouseEvent<HTMLAnchorElement>, target: string) => {
-    event.preventDefault();
+  const jump = (e: RMouseEvent<HTMLAnchorElement>, target: string) => {
+    e.preventDefault();
     scrollToTarget(target, { offset: -24 });
   };
 
+  const chars = (word: string) => word.split('').map((c, i) => <span key={i} className="hx-char-mask"><span className="hx-char">{c}</span></span>);
+
   return (
-    <section className="hero" id="home">
-      <div className="hero-wrapper">
-        {/* ── Left column ── */}
-        <div className="hero-content">
-          <div className="hero-badge glass-card">
-            <span className="status-dot" />
-            <span>Available for Freelance &amp; Consulting</span>
-          </div>
-
-          <div className="hero-title">
-            <span className="greeting">Hello, I'm</span>
-            <SplitHeading as="h1" className="name" text="Gichogu Macharia" />
-            <span className="title-line">
-              <SplitHeading as="h3" className="title-prefix" text="I build" delay={0.12} />
-              <span className="title-typed"><Typewriter phrases={PHRASES} enabled={isReady} /></span>
-              <span className="cursor">|</span>
-            </span>
-          </div>
-
-          <p className="hero-description">
-            AI Engineer, ML Engineer &amp; Data Scientist based in Nairobi, Kenya. I specialise in
-            building robust AI/ML solutions, scalable data pipelines, and production-ready systems
-            that drive measurable digital transformation.
-          </p>
-
-          <div className="hero-marquee-shell">
-            <Marquee items={HERO_MARQUEE_ITEMS} className="hero-marquee" />
-          </div>
-
-          <div className="hero-cta">
-            {/* Magnetic primary button */}
-            <motion.div
-              ref={mag1Ref}
-              style={{ x: mag1Sx, y: mag1Sy, display: 'inline-block' }}
-              onMouseMove={mag1OnMove}
-              onMouseLeave={mag1OnLeave}
-            >
-              <a href="#projects" className="btn btn-primary" onClick={(event) => handleJump(event, '#projects')}>
-                View My Work <ArrowRight size={18} />
-              </a>
-            </motion.div>
-
-            {/* Magnetic secondary button */}
-            <motion.div
-              ref={mag2Ref}
-              style={{ x: mag2Sx, y: mag2Sy, display: 'inline-block' }}
-              onMouseMove={mag2OnMove}
-              onMouseLeave={mag2OnLeave}
-            >
-              <a href="#contact" className="btn btn-secondary" onClick={(event) => handleJump(event, '#contact')}>Let's Talk</a>
-            </motion.div>
-          </div>
-
-          <div className="hero-socials">
-            <a href="https://linkedin.com/in/gichogu-macharia" target="_blank" rel="noopener noreferrer" className="social-link" aria-label="LinkedIn">
-              <svg width="20" height="20" viewBox="0 0 24 24" fill="currentColor">
-                <path d="M20.447 20.452h-3.554v-5.569c0-1.328-.027-3.037-1.852-3.037-1.853 0-2.136 1.445-2.136 2.939v5.667H9.351V9h3.414v1.561h.046c.477-.9 1.637-1.85 3.37-1.85 3.601 0 4.267 2.37 4.267 5.455v6.286zM5.337 7.433c-1.144 0-2.063-.926-2.063-2.065 0-1.138.92-2.063 2.063-2.063 1.14 0 2.064.925 2.064 2.063 0 1.139-.925 2.065-2.064 2.065zm1.782 13.019H3.555V9h3.564v11.452zM22.225 0H1.771C.792 0 0 .774 0 1.729v20.542C0 23.227.792 24 1.771 24h20.451C23.2 24 24 23.227 24 22.271V1.729C24 .774 23.2 0 22.222 0h.003z"/>
-              </svg>
-            </a>
-            <a href="https://github.com/Mr-Macharia" target="_blank" rel="noopener noreferrer" className="social-link" aria-label="GitHub">
-              <svg width="20" height="20" viewBox="0 0 24 24" fill="currentColor">
-                <path d="M12 0c-6.626 0-12 5.373-12 12 0 5.302 3.438 9.8 8.207 11.387.599.111.793-.261.793-.577v-2.234c-3.338.726-4.033-1.416-4.033-1.416-.546-1.387-1.333-1.756-1.333-1.756-1.089-.745.083-.729.083-.729 1.205.084 1.839 1.237 1.839 1.237 1.07 1.834 2.807 1.304 3.492.997.107-.775.418-1.305.762-1.604-2.665-.305-5.467-1.334-5.467-5.931 0-1.311.469-2.381 1.236-3.221-.124-.303-.535-1.524.117-3.176 0 0 1.008-.322 3.301 1.23.957-.266 1.983-.399 3.003-.404 1.02.005 2.047.138 3.006.404 2.291-1.552 3.297-1.23 3.297-1.23.653 1.653.242 2.874.118 3.176.77.84 1.235 1.911 1.235 3.221 0 4.609-2.807 5.624-5.479 5.921.43.372.823 1.102.823 2.222v3.293c0 .319.192.694.801.576 4.765-1.589 8.199-6.086 8.199-11.386 0-6.627-5.373-12-12-12z"/>
-              </svg>
-            </a>
-            <a href="mailto:gichogumacharia001@gmail.com" className="social-link" aria-label="Email">
-              <Mail size={20} />
-            </a>
-          </div>
+    <section ref={root} className="hero hx" id="home">
+      <NetworkCanvas className="hero-network" />
+      <div className="container hx-inner">
+        <div className="hx-topline">
+          <span className="hx-avail"><span className="ab-pulse" aria-hidden="true" />Available for Freelance &amp; Consulting</span>
+          <span className="hx-meta">AI · ML · Data — Nairobi <NairobiClock /></span>
         </div>
 
-        {/* ── Right column (code window + floating icons) ── */}
-        <div className="hero-visual">
-          <div className="hero-card glass-card">
-            <div className="code-window">
-              <div className="window-header">
-                <div className="window-dots">
-                  <span className="dot red" />
-                  <span className="dot yellow" />
-                  <span className="dot green" />
-                </div>
-                <span className="window-title">ai_agent.py</span>
+
+        <div className="hx-grid">
+          <div className="hx-main">
+          <h1 className="hx-name" aria-label="Gichogu Macharia">
+            <span className="hx-greet" aria-hidden="true">Hello, I'm</span>
+            <span className="hx-name-1" aria-hidden="true">{chars('Gichogu')}</span>
+            <span className="hx-name-2" aria-hidden="true">{chars('Macharia')}</span>
+          </h1>
+            <div className="hx-copy">
+              <p className="hx-build">
+                I build <span className="hx-typed"><Typewriter phrases={PHRASES} enabled={typing} /></span><span className="hx-cursor" aria-hidden="true" />
+              </p>
+              <p className="hx-desc">
+                AI Engineer, ML Engineer &amp; Data Scientist based in Nairobi, Kenya. I specialise in
+                building robust AI/ML solutions, scalable data pipelines, and production-ready systems
+                that drive measurable digital transformation.
+              </p>
+              <div className="hx-cta">
+                <Magnetic>
+                  <a href="#projects" className="btn btn-primary hx-btn" onClick={(e) => jump(e, '#projects')}>
+                    View My Work <ArrowRight size={18} aria-hidden="true" />
+                  </a>
+                </Magnetic>
+                <Magnetic strength={0.25}>
+                  <a href="#contact" className="btn btn-secondary hx-btn" onClick={(e) => jump(e, '#contact')}>Let's Talk</a>
+                </Magnetic>
               </div>
-              <pre className="code-content"><code>
-<span className="keyword">from</span> <span className="module">crewai</span> <span className="keyword">import</span> Agent, Crew{'\n'}
-<span className="keyword">from</span> <span className="module">langchain</span> <span className="keyword">import</span> LLM{'\n'}{'\n'}
-<span className="keyword">class</span> <span className="class-name">AIAssistant</span>:{'\n'}
-{'    '}<span className="keyword">def</span> <span className="function">__init__</span>(<span className="param">self</span>):{'\n'}
-{'        '}<span className="param">self</span>.agent = Agent({'\n'}
-{'            '}role=<span className="string">"AI Engineer"</span>,{'\n'}
-{'            '}goal=<span className="string">"Build intelligent systems"</span>,{'\n'}
-{'            '}backstory=<span className="string">"Expert in AI agents"</span>{'\n'}
-{'        '}){'\n'}
-{'    '}{'\n'}
-{'    '}<span className="keyword">def</span> <span className="function">execute</span>(<span className="param">self</span>, task):{'\n'}
-{'        '}<span className="keyword">return</span> <span className="param">self</span>.agent.run(task)
-              </code></pre>
+              <ul className="hx-socials">
+                {SOCIALS.map((s) => (
+                  <li key={s.label}>
+                    <a href={s.href} target={s.href.startsWith('http') ? '_blank' : undefined} rel="noopener noreferrer">
+                      {s.label === 'Email' ? <Mail size={15} aria-hidden="true" /> : null}{s.label}<span aria-hidden="true">↗</span>
+                    </a>
+                  </li>
+                ))}
+              </ul>
             </div>
           </div>
 
-          <div className="floating-icons">
-            <FloatIcon src={pythonLogo}     alt="Python"     className="icon-1" depth={0.6} mouseX={mouseX} mouseY={mouseY} />
-            <FloatIcon src={langchainLogo}  alt="LangChain"  className="icon-2" depth={0.9} mouseX={mouseX} mouseY={mouseY} />
-            <FloatIcon src={crewaiLogo}     alt="CrewAI"     className="icon-3" depth={0.5} mouseX={mouseX} mouseY={mouseY} />
-            <FloatIcon src={llamaindexLogo} alt="LlamaIndex" className="icon-4" depth={0.7} mouseX={mouseX} mouseY={mouseY} />
+          <div className="hx-ide-wrap">
+            <IDE />
           </div>
         </div>
       </div>
 
-      <div className="scroll-indicator">
-        <span>Scroll to explore</span>
-        <div className="scroll-arrow" />
+      <div className="hx-ticker">
+        <span className="hx-ticker-label">§00 — Index</span>
+        <Marquee items={HERO_MARQUEE_ITEMS} className="hero-marquee" />
+        <span className="hx-scroll">Scroll <i aria-hidden="true" /></span>
       </div>
     </section>
-    );
-  };
-  
-  export default Hero;
+  );
+};
+
+export default Hero;

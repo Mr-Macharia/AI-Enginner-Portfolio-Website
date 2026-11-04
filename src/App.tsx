@@ -1,3 +1,4 @@
+import VelocityMarquee from './components/nx/VelocityMarquee';
 import { lazy, Suspense, useEffect, useRef, useState } from 'react';
 import './index.css';
 import Background from './components/Background';
@@ -130,6 +131,7 @@ function App() {
           <Hero isReady={true} />
           <About />
           <Skills />
+          <VelocityMarquee rows={[['AI Agents', 'RAG Systems', 'MLOps', 'Automation'], ['Data Science', 'Computer Vision', 'Full-Stack', 'GenAI']]} />
           <Suspense fallback={<SectionFallback id="projects" tag="Portfolio" title="Recent Projects" />}>
             <Projects />
           </Suspense>

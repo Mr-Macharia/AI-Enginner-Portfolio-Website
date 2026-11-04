@@ -1,4 +1,5 @@
 import { ArrowUpRight } from 'lucide-react';
+import nexusWhite from '../assets/nexus-logo-light.webp';
 import { scrollToTarget } from '../lib/smoothScroll';
 import pythonLogo      from '../assets/python_footer.svg';
 import langchainLogo   from '../assets/langchain_footer.svg';
@@ -64,7 +65,8 @@ const Footer = () => {
 
       <div className="container nx-footer">
         <div className="nx-footer-grid">
-          <div>
+          <div className="nx-footer-brand">
+            <img className="nx-footer-logo" src={nexusWhite} alt="Gich AI Nexus" width="444" height="160" loading="lazy" decoding="async" />
             <p className="nx-footer-cta">Have a process that eats your team's time?<br /><span className="accent-text">Let's automate it.</span></p>
             <a href="#contact" className="nx-footer-link" onClick={(event) => handleFooterJump(event, '#contact')}>Start a conversation <ArrowUpRight size={18} aria-hidden="true" /></a>
           </div>
@@ -104,7 +106,6 @@ const Footer = () => {
             <p className="nx-footer-loc">Nairobi, Kenya</p>
           </div>
         </div>
-        <p aria-hidden="true" className="nx-wordmark">Gichogu<span className="accent-text">.</span>AI</p>
         <div className="nx-footer-bottom">
           <span className="nx-status"><i />Available for new projects</span>
           <span>&copy; {currentYear} Gichogu Macharia</span>

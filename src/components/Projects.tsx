@@ -1,19 +1,18 @@
-import { useRef } from 'react';
+import { useEffect, useRef, useState, type MouseEvent as RMouseEvent } from 'react';
 import gsap from 'gsap';
 import { ScrollTrigger } from 'gsap/ScrollTrigger';
 import { useGSAP } from '@gsap/react';
-import { ArrowUpRight, Github } from 'lucide-react';
-import ScrollReveal from './ScrollReveal';
-import SplitHeading from './SplitHeading';
+import { ArrowLeft, ArrowRight, ArrowUpRight, Github, X } from 'lucide-react';
+import { getLenis } from '../lib/smoothScroll';
 import aiLogoAgent from '../assets/dark_mode/logo_design_agent.webp';
 import aiAdminAssistant from '../assets/light_mode/ai_admin_assistant.webp';
 import truthAi from '../assets/light_mode/truth_ai.webp';
 import emminenceRealtors from '../assets/dark_mode/emminence_realtors.webp';
-import gigiHygiene from '../assets/light_mode/gigi_hygiene.webp';
+import gigiHygiene from '../assets/live_gigi.webp';
 import graniteAiAgents from '../assets/dark_mode/granite_ai_agents.webp';
 import whatsappAiAssistant from '../assets/dark_mode/whatsapp_agent.webp';
 import resumeAssistantAi from '../assets/light_mode/resume_ai_assistant.webp';
-import pharmacyChalrose from '../assets/dark_mode/chalrose_pharmacy.webp';
+import pharmacyChalrose from '../assets/live_chalrose.webp';
 import customerResearchApp from '../assets/dark_mode/customer_research_app.webp';
 import applicationGenerator from '../assets/light_mode/job_application_generator.webp';
 import tomatoDiseasePrediction from '../assets/dark_mode/tomato_leaf_disease.webp';
@@ -169,92 +168,230 @@ const ordered: Project[] = [
 
 gsap.registerPlugin(ScrollTrigger, useGSAP);
 
-// 6-column bento. Rows alternate halves (2 tiles) and thirds (3 tiles); the tail is
-// resolved so the final row is always full — no orphan tile.
-function buildSpans(n: number): ('half' | 'third')[] {
-  const out: ('half' | 'third')[] = [];
-  let left = n;
-  let useHalves = true;
-  while (left > 0) {
-    if (left === 1) { out.push('half'); break; }
-    if (left === 4) { out.push('half', 'half', 'half', 'half'); break; }
-    const size = left === 2 ? 2 : left === 3 ? 3 : useHalves ? 2 : 3;
-    for (let i = 0; i < size; i++) out.push(size === 2 ? 'half' : 'third');
-    left -= size;
-    useHalves = !useHalves;
-  }
-  return out;
-}
+type Group = 'agents' | 'web' | 'data';
+const FILTERS: { id: 'all' | Group; label: string }[] = [
+  { id: 'all', label: 'All' },
+  { id: 'agents', label: 'Agents & Automation' },
+  { id: 'web', label: 'Web & Product' },
+  { id: 'data', label: 'Data & ML' },
+];
+const groupOf = (p: Project): Group =>
+  /e-commerce|web app/i.test(p.category) ? 'web'
+    : /deep learning|data analytics|analytics ai/i.test(p.category) ? 'data'
+      : 'agents';
+const GROUP_LABEL: Record<Group, string> = { agents: 'Agents & Automation', web: 'Web & Product', data: 'Data & ML' };
+const pad = (n: number) => String(n).padStart(2, '0');
 
-const SPANS = buildSpans(projects.length);
+/* ------------------------------------------------------------------ */
+/* Case study overlay (native <dialog>: focus trap + Esc for free)      */
+/* ------------------------------------------------------------------ */
+function CaseStudy({ list, index, onClose, onNavigate }: {
+  list: Project[]; index: number | null; onClose: () => void; onNavigate: (i: number) => void;
+}) {
+  const ref = useRef<HTMLDialogElement>(null);
+  const panel = useRef<HTMLDivElement>(null);
+  const open = index !== null;
+  const p = open ? list[index] : null;
 
-function ProjectTile({ project, index }: { project: Project; index: number }) {
-  const span = SPANS[index] ?? 'third';
-  const primary = project.live ?? project.github;
+  useEffect(() => {
+    const d = ref.current;
+    if (!d) return;
+    if (open && !d.open) {
+      d.showModal();
+      d.querySelector<HTMLButtonElement>('.cs-close')?.focus();
+      getLenis()?.stop();
+      if (!window.matchMedia('(prefers-reduced-motion: reduce)').matches) {
+        gsap.fromTo(panel.current, { clipPath: 'inset(100% 0% 0% 0% round 28px)' }, { clipPath: 'inset(0% 0% 0% 0% round 28px)', duration: 0.9, ease: 'expo.out' });
+        gsap.fromTo('.cs-reveal', { y: 40, opacity: 0 }, { y: 0, opacity: 1, duration: 0.8, ease: 'expo.out', stagger: 0.06, delay: 0.25 });
+      }
+    }
+    if (!open && d.open) { d.close(); getLenis()?.start(); }
+  }, [open]);
+
+  // Re-run the content stagger when paging between projects.
+  useEffect(() => {
+    if (!open || window.matchMedia('(prefers-reduced-motion: reduce)').matches) return;
+    gsap.fromTo('.cs-reveal', { y: 24, opacity: 0 }, { y: 0, opacity: 1, duration: 0.6, ease: 'expo.out', stagger: 0.05 });
+    gsap.fromTo('.cs-media img', { scale: 1.12 }, { scale: 1, duration: 1.2, ease: 'expo.out' });
+  }, [index, open]);
+
+  const go = (step: number) => onNavigate((index! + step + list.length) % list.length);
+
   return (
-    <article className={`bento-tile glass-card bento-${span}${project.brand ? ` bento-brand brand-${project.brand}` : ''}`} data-cursor-label="View">
-      <div className="bento-top">
-        <span className="bento-tag">{project.brand ? <><i className="bento-live" />Client · live</> : <>{String(index + 1).padStart(2, '0')} · {project.category}</>}</span>
-        <a href={primary} target="_blank" rel="noopener noreferrer" className="bento-arrow" aria-label={`Open ${project.title}`}>
-          <ArrowUpRight size={20} aria-hidden="true" />
-        </a>
-      </div>
-      <h3 className="bento-title">{project.title}</h3>
-      <p className="bento-desc">{project.description}</p>
-      <div className="bento-media">
-        <img src={project.image} alt={`${project.title} screenshot`} loading="lazy" decoding="async" width="600" height="360" />
-      </div>
-      <div className="bento-foot">
-        <div className="bento-tech">{project.tech.slice(0, span === 'third' ? 2 : 4).map((t) => <span key={t}>{t}</span>)}</div>
-        <div className="bento-links">
-          {project.live && <a href={project.live} target="_blank" rel="noopener noreferrer">Live <ArrowUpRight size={14} aria-hidden="true" /></a>}
-          {project.github && <a href={project.github} target="_blank" rel="noopener noreferrer"><Github size={14} aria-hidden="true" /> Code</a>}
+    <dialog
+      ref={ref}
+      className="cs"
+      aria-labelledby="cs-title"
+      onCancel={(e) => { e.preventDefault(); onClose(); }}
+      onClick={(e) => { if (e.target === ref.current) onClose(); }}
+      onKeyDown={(e) => { if (e.key === 'ArrowRight') go(1); if (e.key === 'ArrowLeft') go(-1); }}
+      data-lenis-prevent
+    >
+      {p && (
+        <div ref={panel} className={`cs-panel${p.brand ? ` cs-brand brand-${p.brand}` : ''}`}>
+          <header className="cs-bar">
+            <span className="cs-crumb">case_study / {pad(index! + 1)} of {pad(list.length)}</span>
+            <div className="cs-nav">
+              <button type="button" className="cs-btn" onClick={() => go(-1)} aria-label="Previous project"><ArrowLeft size={18} /></button>
+              <button type="button" className="cs-btn" onClick={() => go(1)} aria-label="Next project"><ArrowRight size={18} /></button>
+              <button type="button" className="cs-btn cs-close" onClick={onClose} aria-label="Close case study"><X size={18} /></button>
+            </div>
+          </header>
+          <div className="cs-body">
+            <figure className="cs-media">
+              <img src={p.image} alt={`${p.title} screenshot`} width="1200" height="720" decoding="async" />
+            </figure>
+            <div className="cs-copy">
+              <p className="cs-kicker cs-reveal">{p.brand ? <><i className="bento-live" />Live client project</> : `${GROUP_LABEL[groupOf(p)]} · ${p.category}`}</p>
+              <h3 id="cs-title" className="cs-title cs-reveal">{p.title}</h3>
+              <p className="cs-desc cs-reveal">{p.description}</p>
+              <dl className="cs-specs cs-reveal">
+                <div><dt>Discipline</dt><dd>{p.category}</dd></div>
+                <div><dt>Stack</dt><dd className="cs-stack">{p.tech.map((t) => <span key={t}>{t}</span>)}</dd></div>
+              </dl>
+              <div className="cs-actions cs-reveal">
+                {p.live && <a className="btn btn-primary" href={p.live} target="_blank" rel="noopener noreferrer">Visit live site <ArrowUpRight size={18} aria-hidden="true" /></a>}
+                {p.github && <a className={`btn ${p.live ? 'cs-ghost' : 'btn-primary'}`} href={p.github} target="_blank" rel="noopener noreferrer"><Github size={18} aria-hidden="true" /> View source</a>}
+              </div>
+            </div>
+          </div>
         </div>
-      </div>
-    </article>
+      )}
+    </dialog>
   );
 }
 
+/* ------------------------------------------------------------------ */
+/* Work index                                                           */
+/* ------------------------------------------------------------------ */
 const Projects = () => {
   const root = useRef<HTMLElement>(null);
+  const preview = useRef<HTMLDivElement>(null);
+  const [filter, setFilter] = useState<'all' | Group>('all');
+  const [hovered, setHovered] = useState<number | null>(null);
+  const [openIndex, setOpenIndex] = useState<number | null>(null);
+  const lastTrigger = useRef<HTMLButtonElement | null>(null);
+  const mover = useRef<{ x: gsap.QuickToFunc; y: gsap.QuickToFunc } | null>(null);
+
+  const [showAll, setShowAll] = useState(false);
+  const visible = ordered.filter((p) => filter === 'all' || groupOf(p) === filter);
+  // Lead with the strongest work; the rest is one tap away.
+  const PREVIEW = 8;
+  const listed = showAll ? visible : visible.slice(0, PREVIEW);
+  const count = (id: 'all' | Group) => (id === 'all' ? ordered.length : ordered.filter((p) => groupOf(p) === id).length);
 
   useGSAP(() => {
+    mover.current = {
+      x: gsap.quickTo(preview.current, 'x', { duration: 0.6, ease: 'power3' }),
+      y: gsap.quickTo(preview.current, 'y', { duration: 0.6, ease: 'power3' }),
+    };
     const mm = gsap.matchMedia();
     mm.add('(prefers-reduced-motion: no-preference)', () => {
-      gsap.utils.toArray<HTMLElement>('.bento-tile').forEach((tile) => {
-        gsap.from(tile, {
-          y: 48, opacity: 0, duration: 0.9, ease: 'expo.out',
-          scrollTrigger: { trigger: tile, start: 'top 88%', once: true },
-        });
-        const img = tile.querySelector('.bento-media img');
-        if (img) {
-          gsap.fromTo(img, { yPercent: -6, scale: 1.12 }, {
-            yPercent: 6, ease: 'none',
-            scrollTrigger: { trigger: tile, start: 'top bottom', end: 'bottom top', scrub: true },
-          });
-        }
+      gsap.from('.wk-title-line', {
+        yPercent: 110, duration: 1.1, ease: 'expo.out', stagger: 0.08,
+        scrollTrigger: { trigger: '.wk-head', start: 'top 80%', once: true },
+      });
+      gsap.from('.wk-row', {
+        y: 40, opacity: 0, duration: 0.9, ease: 'expo.out', stagger: 0.05,
+        scrollTrigger: { trigger: '.wk-list', start: 'top 85%', once: true },
+      });
+      gsap.from('.wk-rule', {
+        scaleX: 0, transformOrigin: 'left center', duration: 1.2, ease: 'expo.inOut', stagger: 0.05,
+        scrollTrigger: { trigger: '.wk-list', start: 'top 85%', once: true },
       });
     });
     return () => mm.revert();
   }, { scope: root });
 
+  // Re-stagger rows on filter change.
+  const first = useRef(true);
+  useEffect(() => {
+    if (first.current) { first.current = false; return; }
+    if (window.matchMedia('(prefers-reduced-motion: reduce)').matches) return;
+    gsap.fromTo('.wk-row', { y: 24, opacity: 0 }, { y: 0, opacity: 1, duration: 0.6, ease: 'expo.out', stagger: 0.04 });
+    ScrollTrigger.refresh();
+  }, [filter]);
+
+  const onMove = (e: RMouseEvent) => {
+    mover.current?.x(e.clientX);
+    mover.current?.y(e.clientY);
+  };
+
+  const openCase = (i: number, btn: HTMLButtonElement) => { lastTrigger.current = btn; setHovered(null); setOpenIndex(i); };
+  const closeCase = () => { setOpenIndex(null); requestAnimationFrame(() => lastTrigger.current?.focus({ preventScroll: true })); };
+
   return (
-    <section ref={root} className="projects section nx-alt" id="projects">
+    <section ref={root} className="projects section wk" id="projects" data-bp="§03 — Work">
       <div className="container">
-        <ScrollReveal>
-          <div className="nx-head">
-            <div>
-              <SplitHeading className="section-title" text="Selected work" />
-            </div>
-            <a href="https://github.com/Mr-Macharia" target="_blank" rel="noopener noreferrer" className="btn btn-secondary">
-              All repositories <ArrowUpRight size={18} aria-hidden="true" />
+        <div className="wk-head">
+          <div>
+            <span className="section-tag">Selected work</span>
+            <h2 className="wk-title" aria-label="Work that ships.">
+              <span className="wk-title-mask"><span className="wk-title-line">Work that</span></span>
+              <span className="wk-title-mask"><span className="wk-title-line"><em>ships.</em></span></span>
+            </h2>
+          </div>
+          <div className="wk-head-side">
+            <p>AI agents, data products and production web apps, from first prompt to paying client. Open any project for the case study.</p>
+            <a href="https://github.com/Mr-Macharia" target="_blank" rel="noopener noreferrer" className="wk-link">
+              All repositories <ArrowUpRight size={16} aria-hidden="true" />
             </a>
           </div>
-        </ScrollReveal>
-        <div className="bento-grid">
-          {ordered.map((p, i) => <ProjectTile key={p.title} project={p} index={i} />)}
+        </div>
+
+        <div className="wk-bar">
+          <div className="wk-filters" role="group" aria-label="Filter projects">
+            {FILTERS.map((f) => (
+              <button key={f.id} type="button" className={`wk-chip${filter === f.id ? ' is-active' : ''}`} aria-pressed={filter === f.id} onClick={() => setFilter(f.id)}>
+                {f.label}<sup>{pad(count(f.id))}</sup>
+              </button>
+            ))}
+          </div>
+          <p className="wk-status" aria-live="polite"><b>{pad(visible.length)}</b> / {pad(ordered.length)} projects</p>
+        </div>
+
+        <ol className="wk-list" onMouseMove={onMove} onMouseLeave={() => setHovered(null)}>
+          {listed.map((p, i) => (
+            <li key={p.title} className={`wk-row${p.brand ? ` wk-brand brand-${p.brand}` : ''}`}>
+              <span className="wk-rule" aria-hidden="true" />
+              <button
+                type="button"
+                className="wk-open"
+                onMouseEnter={() => setHovered(i)}
+                onFocus={() => setHovered(null)}
+                onClick={(e) => openCase(i, e.currentTarget)}
+                aria-haspopup="dialog"
+              >
+                <span className="wk-n">{pad(i + 1)}</span>
+                <span className="wk-name">{p.title}</span>
+                <span className="wk-meta">
+                  {p.brand ? <span className="wk-live"><i className="bento-live" />Live client</span> : <span className="wk-cat">{p.category}</span>}
+                  <span className="wk-tech">{p.tech.slice(0, 2).join(' · ')}</span>
+                </span>
+                <img className="wk-thumb" src={p.image} alt="" loading="lazy" decoding="async" width="160" height="100" />
+                <span className="wk-go" aria-hidden="true"><ArrowUpRight size={22} /></span>
+              </button>
+            </li>
+          ))}
+          <li className="wk-row wk-end" aria-hidden="true"><span className="wk-rule" /></li>
+        </ol>
+        {visible.length > PREVIEW && (
+          <button type="button" className="wk-more" aria-expanded={showAll} onClick={() => setShowAll((v) => !v)}>
+            {showAll ? 'Show fewer' : `Show all ${visible.length} projects`}
+          </button>
+        )}
+      </div>
+
+      {/* Cursor-following preview (fine pointers only) */}
+      <div ref={preview} className={`wk-preview${hovered !== null ? ' is-on' : ''}`} aria-hidden="true">
+        <div className="wk-preview-inner">
+          {visible.map((p, i) => (
+            <img key={p.title} src={p.image} alt="" className={i === hovered ? 'is-active' : ''} loading="lazy" decoding="async" />
+          ))}
         </div>
       </div>
+
+      <CaseStudy list={visible} index={openIndex} onClose={closeCase} onNavigate={setOpenIndex} />
     </section>
   );
 };

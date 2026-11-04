@@ -38,59 +38,6 @@ const experiences = [
       'Collaborated on resource forecasting and capacity planning',
     ],
   },
-  {
-    date: 'Jun 2022 – Sep 2022',
-    title: 'Monitoring & Evaluation Intern',
-    company: 'Women Enterprise Fund',
-    location: 'Nairobi, Kenya',
-    description: 'Collected, cleaned, and validated data from national and community field projects. Performed statistical analysis of beneficiary impact and program performance.',
-    tags: ['Data Analysis', 'Statistical Modeling', 'Power BI', 'M&E'],
-  },
-];
-
-const education = [
-  {
-    title: 'Artificial Intelligence Training',
-    institution: 'ICT Authority',
-    date: 'Jul 2026',
-    description: 'Comprehensive training covering Artificial Intelligence methodologies, implementation frameworks, and digital workspace alignment. (Credential ID: CTA-1783118955-7426-44239)',
-  },
-  {
-    title: 'Agentic AI',
-    institution: 'DeepLearning.AI',
-    date: 'Jul 2026',
-    description: 'Planning and designing Agentic AI systems, workflow orchestration, and evaluation of multi-agent workflows. (Credential ID: e2elacc8-7bbd-4a85-8549-dda3b7352a64)',
-  },
-  {
-    title: 'BSc Strategic Management',
-    institution: 'Jomo Kenyatta University of Agriculture and Technology (JKUAT)',
-    date: '2019 – 2023',
-    description: 'Second Upper-Class Honors. Coursework in Financial Management, Business Analytics, Organizational Analysis, and Business Strategy.',
-  },
-  {
-    title: 'Data Science',
-    institution: 'Moringa School',
-    date: '2023 – 2024',
-    description: 'Intensive data science program covering Python, ML algorithms, statistical analysis, and end-to-end project delivery.',
-  },
-  {
-    title: 'AI & Automation Engineering',
-    institution: 'One Dev Academy',
-    date: 'Nov 2025',
-    description: 'Advanced AI engineering and automation systems design.',
-  },
-  {
-    title: 'Generative AI',
-    institution: 'Udacity',
-    date: '2024 – 2025',
-    description: 'Specialized program in generative AI, LLMs, and prompt engineering.',
-  },
-  {
-    title: 'Data and AI',
-    institution: 'ALX Africa / Cyber Shujaa',
-    date: '2025',
-    description: 'Data engineering, AI fundamentals, and cybersecurity-aware AI development.',
-  },
 ];
 
 import { useRef } from 'react';
@@ -103,13 +50,12 @@ import SplitHeading from './SplitHeading';
 gsap.registerPlugin(ScrollTrigger, useGSAP);
 
 const looks = ['xp-look-accent', 'xp-look-ink', 'xp-look-soft'];
+const STICK_TOP = 96;
+const STICK_STEP = 22;
 const pad = (n: number) => String(n).padStart(2, '0');
-const slug = (s: string) => s.toLowerCase().replace(/[^a-z0-9]+/g, '_').replace(/^_|_$/g, '');
 
 const Experience = () => {
   const root = useRef<HTMLElement>(null);
-  const eduRoot = useRef<HTMLDivElement>(null);
-  const track = useRef<HTMLOListElement>(null);
 
   useGSAP(() => {
     const mm = gsap.matchMedia();
@@ -119,9 +65,9 @@ const Experience = () => {
       const cards = gsap.utils.toArray<HTMLElement>('.xp-stack-card');
       cards.forEach((card, i) => {
         if (i === cards.length - 1) return;
-        // Sticky offsets match the inline `top: calc(100px + i * 28px)` on each card.
-        const stickTop = 100 + i * 28;
-        const nextStickTop = 100 + (i + 1) * 28;
+        // Sticky offsets match the inline `top` on each card.
+        const stickTop = STICK_TOP + i * STICK_STEP;
+        const nextStickTop = STICK_TOP + (i + 1) * STICK_STEP;
         const inner = card.firstElementChild as HTMLElement;
         // Only recede once the next card actually starts covering this one
         // (its top crosses this card's pinned bottom edge), so the card is
@@ -144,20 +90,11 @@ const Experience = () => {
       });
     });
 
-    // Education: pin and scroll horizontally on desktop.
-    mm.add('(min-width: 1024px) and (prefers-reduced-motion: no-preference)', () => {
-      const el = track.current!;
-      const dist = () => el.scrollWidth - window.innerWidth + 64;
-      const st = { trigger: eduRoot.current, start: 'top top', end: () => `+=${dist()}`, invalidateOnRefresh: true };
-      gsap.to(el, { x: () => -dist(), ease: 'none', scrollTrigger: { ...st, pin: true, scrub: 1 } });
-      gsap.to('.edu-progress', { scaleX: 1, ease: 'none', scrollTrigger: { ...st, scrub: true } });
-    });
-
     return () => mm.revert();
   }, { scope: root });
 
   return (
-    <section ref={root} className="experience section" id="experience">
+    <section ref={root} className="experience section" id="experience" data-bp="§04 — Career">
       <div className="container">
         <ScrollReveal>
           <div className="nx-head">
@@ -169,66 +106,43 @@ const Experience = () => {
         </ScrollReveal>
 
         <div className="xp-stack">
-          {experiences.map((exp, i) => (
-            <div key={exp.company + exp.title} className="xp-stack-card" style={{ top: `calc(100px + ${i * 28}px)` }}>
-              <article className={`xp-card grain ${looks[i % looks.length]}`}>
-                <span className="xp-ghost" aria-hidden="true">{pad(i + 1)}</span>
-                <div className="xp-left">
-                  <span className="xp-kicker">Role {pad(i + 1)} · {exp.company}</span>
-                  <div>
-                    <h3 className="xp-title">{exp.title}</h3>
-                    <div className="xp-chips">
-                      <span>{exp.date}</span>
-                      {exp.location && <span>{exp.location}</span>}
+          {experiences.map((exp, i) => {
+            const current = exp.date.includes('Present');
+            return (
+              <div key={exp.company + exp.title} className="xp-stack-card" style={{ top: `calc(${STICK_TOP}px + ${i * STICK_STEP}px)` }}>
+                <article className={`xp-card grain ${looks[i % looks.length]}`}>
+                  <header className="xp-head">
+                    <span className="xp-idx" aria-hidden="true">{pad(i + 1)}</span>
+                    <div className="xp-role">
+                      <span className="xp-company">
+                        {exp.company}
+                        {current && <span className="xp-now"><span className="ab-pulse" aria-hidden="true" />Current</span>}
+                      </span>
+                      <h3 className="xp-title">{exp.title}</h3>
                     </div>
+                    <div className="xp-meta">
+                      <span>{exp.date}</span>
+                      <span>{exp.location}</span>
+                    </div>
+                  </header>
+                  <div className="xp-body">
+                    <div className="xp-summary">
+                      <p className="xp-desc">{exp.description}</p>
+                      <ul className="xp-tags" aria-label="Stack">{exp.tags.map((t) => <li key={t}>{t}</li>)}</ul>
+                    </div>
+                    <ul className="xp-list" aria-label="Highlights">
+                      {exp.achievements.map((a, k) => (
+                        <li key={a}><span aria-hidden="true">{pad(k + 1)}</span>{a}</li>
+                      ))}
+                    </ul>
                   </div>
-                </div>
-                <div className="xp-right">
-                  <p className="xp-desc">{exp.description}</p>
-                  <ul className="xp-list">
-                    {(exp.achievements ?? exp.tags.map((t) => t)).map((a, k) => (
-                      <li key={a}><span>{pad(k + 1)}</span>{a}</li>
-                    ))}
-                  </ul>
-                  {exp.achievements && (
-                    <div className="xp-tags">{exp.tags.map((t) => <span key={t}>{t}</span>)}</div>
-                  )}
-                </div>
-              </article>
-            </div>
-          ))}
+                </article>
+              </div>
+            );
+          })}
         </div>
       </div>
 
-      <div ref={eduRoot} className="edu-pin">
-        <div className="container edu-head">
-          <div>
-            <span className="section-tag">Education</span>
-            <h3 className="section-title edu-title">Always learning. <span className="outline-text">Never</span> done.</h3>
-          </div>
-          <div className="edu-progress-wrap" aria-hidden="true">
-            <div className="edu-progress-bar"><div className="edu-progress" /></div>
-            <p>Scroll to explore</p>
-          </div>
-        </div>
-        <ol ref={track} className="edu-track">
-          {education.map((edu, i) => (
-            <li key={edu.title} className="edu-step glass-card">
-              <span className="edu-ghost" aria-hidden="true">{pad(i + 1)}</span>
-              <span className="edu-n">step_{pad(i + 1)}</span>
-              <div className="edu-body">
-                <span className="edu-date">{edu.date}</span>
-                <h4>{edu.title}</h4>
-                <p>{edu.description.replace(/\s*\(Credential ID:.*\)$/, '')}</p>
-                <span className="edu-file"><b>↳</b>{slug(edu.institution).slice(0, 24)}.cert</span>
-              </div>
-            </li>
-          ))}
-          <li className="edu-end">
-            <p>Next module: whatever your project needs.</p>
-          </li>
-        </ol>
-      </div>
     </section>
   );
 };

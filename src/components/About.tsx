@@ -1,144 +1,125 @@
-import { useEffect, useRef, useState } from 'react';
-import { motion } from 'framer-motion';
-import SplitHeading from './SplitHeading';
-import profileImage from '../assets/profile.webp';
-import BorderGlow from './BorderGlow';
+import { useRef } from 'react';
+import gsap from 'gsap';
+import { ScrollTrigger } from 'gsap/ScrollTrigger';
+import { useGSAP } from '@gsap/react';
+import { Compass, Rocket, ShieldCheck } from 'lucide-react';
+import CountUp from './nx/CountUp';
+import NairobiClock from './nx/NairobiClock';
+
+gsap.registerPlugin(ScrollTrigger, useGSAP);
+
+const MANIFESTO =
+  'I sit where strategy meets engineering. A Strategic Management degree taught me to ask what a business actually needs; data science taught me how to build it. Today I ship multi-agent systems, ML pipelines and production web apps that pay for themselves.';
+
+const stats = [
+  { to: 60, suffix: '+', label: 'Public repositories' },
+  { to: 15, suffix: '+', label: 'Projects delivered' },
+  { to: 10, suffix: '+', label: 'Clients served' },
+  { to: 2, suffix: '+', label: 'Years building AI' },
+];
+
+const principles = [
+  {
+    icon: Compass,
+    title: 'Business first',
+    body: 'Every build starts from a KPI, not a model. My strategy background keeps the work tied to measurable outcomes.',
+  },
+  {
+    icon: Rocket,
+    title: 'Ship to production',
+    body: 'Demos are easy. I design for MLOps, monitoring and handover, so systems keep working after launch day.',
+  },
+  {
+    icon: ShieldCheck,
+    title: 'Responsible by default',
+    body: 'Clean, maintainable code and ethical AI practice: privacy-aware data handling and humans in the loop.',
+  },
+];
+
+const stack = ['CrewAI', 'LangChain', 'Agno', 'TensorFlow', 'PyTorch', 'GCP'];
 
 const About = () => {
-  const [counters, setCounters] = useState({ repos: 0, projects: 0, clients: 0, years: 0 });
-  const sectionRef = useRef<HTMLElement>(null);
-  const hasAnimated = useRef(false);
+  const root = useRef<HTMLElement>(null);
 
-  useEffect(() => {
-    const observer = new IntersectionObserver(
-      (entries) => {
-        if (entries[0].isIntersecting && !hasAnimated.current) {
-          hasAnimated.current = true;
-          animateCounters();
-        }
-      },
-      { threshold: 0.3 }
-    );
-
-    if (sectionRef.current) {
-      observer.observe(sectionRef.current);
-    }
-
-    return () => observer.disconnect();
-  }, []);
-
-  const animateCounters = () => {
-    const targets = { repos: 60, projects: 15, clients: 10, years: 2 };
-    const duration = 2000;
-    const steps = 60;
-    const stepTime = duration / steps;
-
-    let step = 0;
-    const interval = setInterval(() => {
-      step++;
-      const progress = step / steps;
-      setCounters({
-        repos: Math.round(targets.repos * progress),
-        projects: Math.round(targets.projects * progress),
-        clients: Math.round(targets.clients * progress),
-        years: Math.round(targets.years * progress),
+  useGSAP(() => {
+    const mm = gsap.matchMedia();
+    mm.add('(prefers-reduced-motion: no-preference)', () => {
+      // Manifesto: words light up as you read down the section.
+      gsap.fromTo('.ab-word', { opacity: 0.14 }, {
+        opacity: 1, ease: 'none', stagger: 0.08,
+        scrollTrigger: { trigger: '.ab-manifesto', start: 'top 80%', end: 'bottom 45%', scrub: true },
       });
-
-      if (step >= steps) clearInterval(interval);
-    }, stepTime);
-  };
+      gsap.from('.ab-principle', {
+        y: 40, opacity: 0, duration: 0.9, ease: 'expo.out', stagger: 0.12,
+        scrollTrigger: { trigger: '.ab-principles', start: 'top 85%', once: true },
+      });
+      gsap.from('.ab-chip', {
+        scale: 0.6, opacity: 0, duration: 0.6, ease: 'back.out(2)', stagger: 0.06,
+        scrollTrigger: { trigger: '.ab-portrait', start: 'top 75%', once: true },
+      });
+    });
+    return () => mm.revert();
+  }, { scope: root });
 
   return (
-    <section className="about section" id="about" ref={sectionRef}>
+    <section ref={root} className="about section" id="about" data-bp="§01 — About">
       <div className="container">
-        <motion.div
-          className="section-header"
-          initial={{ opacity: 0, y: 30 }}
-          whileInView={{ opacity: 1, y: 0 }}
-          viewport={{ once: true, margin: '-80px' }}
-          transition={{ duration: 0.55, ease: [0.25, 0.1, 0.25, 1] as [number,number,number,number] }}
-        >
-          <span className="section-tag">About Me</span>
-          <SplitHeading className="section-title" text="Building Intelligent Solutions" />
-        </motion.div>
-        <motion.div
-          className="about-grid"
-          initial="hidden"
-          whileInView="visible"
-          viewport={{ once: true, margin: '-80px' }}
-          variants={{ hidden: {}, visible: { transition: { staggerChildren: 0.15 } } }}
-        >
-          <motion.div
-            className="about-content glass-card"
-            variants={{ hidden: { opacity: 0, x: -40 }, visible: { opacity: 1, x: 0, transition: { duration: 0.6, ease: [0.25, 0.1, 0.25, 1] as [number,number,number,number] } } }}
-          >
-            <div className="about-text">
-              <p className="lead">
-                Strategic, versatile AI Engineer, ML Engineer & Data Scientist with a dual background 
-                in Strategic Management and Data Science, delivering production-ready systems that drive 
-                measurable digital transformation.
-              </p>
-              <p>
-                With 2+ years of experience building robust AI/ML solutions, I specialize in designing 
-                multi-agent AI systems, MLOps pipelines, and scalable cloud infrastructure using frameworks 
-                like CrewAI, LangChain, TensorFlow, and PyTorch. I help businesses harness the power of 
-                artificial intelligence — from data analytics and business intelligence to GenAI and RAG systems.
-              </p>
-              <p>
-                I believe in writing clean, maintainable code and advancing ethical AI in business. 
-                Based in Nairobi, Kenya, I lead cross-functional teams and work with clients globally, 
-                consistently exceeding KPIs and delivering stakeholder value.
-              </p>
+        <div className="ab-grid">
+          <div className="ab-copy">
+            <span className="section-tag">About</span>
+            <h2 className="section-title ab-title">
+              Strategy brain.<br /><span className="outline-text">Engineer</span> hands.
+            </h2>
+            <p className="ab-manifesto">
+              <span className="sr-only">{MANIFESTO}</span>
+              {MANIFESTO.split(' ').map((w, i) => (
+                <span key={i} className="ab-word" aria-hidden="true">{w} </span>
+              ))}
+            </p>
+            <p className="ab-body">
+              Over 2+ years I've designed multi-agent AI systems, MLOps pipelines and scalable cloud
+              infrastructure with CrewAI, LangChain, TensorFlow and PyTorch, from analytics and BI to GenAI
+              and RAG. I lead cross-functional teams from Nairobi and work with clients globally.
+            </p>
+          </div>
+
+          <figure className="ab-portrait ab-portrait-nophoto">
+            <figcaption className="ab-spec">
+              <div className="ab-spec-bar" aria-hidden="true"><i /><i /><i /><span>whoami.yml</span></div>
+              <dl>
+                <div><dt>name</dt><dd>Gichogu Macharia</dd></div>
+                <div><dt>role</dt><dd>AI / ML Engineer · Data Scientist</dd></div>
+                <div><dt>base</dt><dd>Nairobi · <NairobiClock /></dd></div>
+                <div><dt>status</dt><dd className="ab-status"><span className="ab-pulse" aria-hidden="true" />Available for projects</dd></div>
+              </dl>
+            </figcaption>
+            <ul className="ab-chips" aria-label="Core stack">
+              {stack.map((s, i) => <li key={s} className={`ab-chip ab-chip-${i}`}>{s}</li>)}
+            </ul>
+          </figure>
+        </div>
+
+        <dl className="ab-stats">
+          {stats.map((s) => (
+            <div key={s.label} className="ab-stat">
+              <dt>{s.label}</dt>
+              <dd><CountUp to={s.to} suffix={s.suffix} /></dd>
             </div>
-            <div className="about-stats">
-              <div className="stat-item">
-                <span className="stat-number">{counters.repos}+</span>
-                <span className="stat-label">Public Repos</span>
+          ))}
+        </dl>
+
+        <div className="ab-principles">
+          {principles.map((p, i) => (
+            <article key={p.title} className="ab-principle glass-card">
+              <div className="ab-principle-top">
+                <span className="ab-icon"><p.icon size={20} aria-hidden="true" /></span>
+                <span className="ab-n">principle_{String(i + 1).padStart(2, '0')}</span>
               </div>
-              <div className="stat-item">
-                <span className="stat-number">{counters.projects}+</span>
-                <span className="stat-label">Projects Delivered</span>
-              </div>
-              <div className="stat-item">
-                <span className="stat-number">{counters.clients}+</span>
-                <span className="stat-label">Happy Clients</span>
-              </div>
-              <div className="stat-item">
-                <span className="stat-number">{counters.years}+</span>
-                <span className="stat-label">Years Experience</span>
-              </div>
-            </div>
-          </motion.div>
-          <motion.div
-            className="about-image"
-            variants={{ hidden: { opacity: 0, x: 40 }, visible: { opacity: 1, x: 0, transition: { duration: 0.6, ease: [0.25, 0.1, 0.25, 1] as [number,number,number,number] } } }}
-          >
-            <BorderGlow
-              className="image-frame"
-              edgeSensitivity={30}
-              glowColor="20 100% 60%"
-              backgroundColor="var(--bg-secondary)"
-              borderRadius={28}
-              glowRadius={40}
-              glowIntensity={1.0}
-              coneSpread={25}
-              animated={true}
-              colors={['#e85d04', '#f48c06', '#dc2f02']}
-            >
-              <div className="image-placeholder">
-                <img
-                  src={profileImage}
-                  alt="Gichogu Macharia"
-                  className="profile-img"
-                  width="400"
-                  height="400"
-                  loading="lazy"
-                  decoding="async"
-                />
-              </div>
-            </BorderGlow>
-          </motion.div>
-        </motion.div>
+              <h3>{p.title}</h3>
+              <p>{p.body}</p>
+            </article>
+          ))}
+        </div>
       </div>
     </section>
   );

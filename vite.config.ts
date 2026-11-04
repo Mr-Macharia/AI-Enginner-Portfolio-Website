@@ -13,6 +13,11 @@ export default defineConfig({
   },
   build: {
     rollupOptions: {
+      // Two pages: the portfolio and the post-contact thank-you page.
+      input: {
+        main: path.resolve(__dirname, 'index.html'),
+        thankYou: path.resolve(__dirname, 'thank-you/index.html'),
+      },
       output: {
         manualChunks(id) {
           if (!id.includes('node_modules')) {
