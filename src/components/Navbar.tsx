@@ -4,6 +4,7 @@ import { Sun, Moon, X } from 'lucide-react';
 import { useTheme } from '../context/ThemeContext';
 import { getLenis, scrollToTarget } from '../lib/smoothScroll';
 import webLogo from '../assets/nexus-logo.webp';
+import webLogoLight from '../assets/nexus-logo-light.webp';
 
 interface NavbarProps {
   activeSection: string;
@@ -60,7 +61,8 @@ const Navbar = ({ activeSection }: NavbarProps) => {
         <div className="nav-container">
           {/* Logo */}
           <a href="#home" className="nav-logo" onClick={(event) => handleNavClick(event, '#home')}>
-            <img src={webLogo} alt="Gich AI Nexus" className="logo-img" width="100" height="36" decoding="async" fetchPriority="high" />
+            <img src={webLogo} alt="Gich AI Nexus" className="logo-img logo-on-light" width="100" height="36" decoding="async" fetchPriority="high" />
+            <img src={webLogoLight} alt="" aria-hidden="true" className="logo-img logo-on-dark" width="100" height="36" decoding="async" />
           </a>
 
           {/* Desktop nav links with animated active pill */}

@@ -2796,3 +2796,8 @@ body::before {
   content: ""; position: absolute; inset: 0; pointer-events: none; border-radius: inherit;
   background: #0f172a; opacity: var(--xp-dim);
 }
+
+/* Wordmark swaps with theme: dark lettering in light mode, light lettering in dark mode */
+.logo-on-dark { display: none; }
+.dark .logo-on-light { display: none; }
+.dark .logo-on-dark { display: block; }
