@@ -1,12 +1,11 @@
-import { useEffect, useRef, useState } from 'react';
-import { motion } from 'framer-motion';
+import { useRef } from 'react';
 import gsap from 'gsap';
 import { ScrollTrigger } from 'gsap/ScrollTrigger';
+import { useGSAP } from '@gsap/react';
+import { ArrowUpRight, Github } from 'lucide-react';
 import ScrollReveal from './ScrollReveal';
-import ElectricBorder from './ElectricBorder';
 import SplitHeading from './SplitHeading';
 import aiLogoAgent from '../assets/dark_mode/logo_design_agent.webp';
-import useTilt from '../hooks/useTilt';
 import aiAdminAssistant from '../assets/light_mode/ai_admin_assistant.webp';
 import truthAi from '../assets/light_mode/truth_ai.webp';
 import emminenceRealtors from '../assets/dark_mode/emminence_realtors.webp';
@@ -18,9 +17,34 @@ import pharmacyChalrose from '../assets/dark_mode/chalrose_pharmacy.webp';
 import customerResearchApp from '../assets/dark_mode/customer_research_app.webp';
 import applicationGenerator from '../assets/light_mode/job_application_generator.webp';
 import tomatoDiseasePrediction from '../assets/dark_mode/tomato_leaf_disease.webp';
+import agentKit from '../assets/dark_mode/agent_kit.webp';
+import voiceAgent from '../assets/dark_mode/voice_agent.webp';
 import microsoftMovieAnalysis from '../assets/light_mode/microsft_movie.webp';
 
-const projects = [
+type ProjectEntry = {
+  image: string; category: string; title: string; description: string;
+  tech: string[]; live?: string; github?: string; featured?: boolean;
+  brand?: 'gigi' | 'chalrose';
+};
+
+const projects: ProjectEntry[] = [
+  {
+    image: agentKit,
+    category: 'Agent Skills & MCP',
+    title: 'M-Pesa Daraja Agent Kit',
+    description: "Agent Skills and an MCP server for Safaricom's Daraja API, with docs, guides and tutorials so coding agents and developers can build M-Pesa integrations correctly.",
+    tech: ['MCP', 'Agent Skills', 'TypeScript', 'Daraja API'],
+    live: 'https://agent-kit.gichogumacharia.tech/',
+    github: 'https://github.com/Mr-Macharia/mpesa-daraja-skills-and-mcp',
+  },
+  {
+    image: voiceAgent,
+    category: 'Voice & RAG Agent',
+    title: 'Clyde: Voice Portfolio Agent',
+    description: 'A portfolio you can talk to. Clyde answers questions about my work, projects and experience and books meetings, by text or live voice.',
+    tech: ['Voice AI', 'RAG', 'Search', 'Booking'],
+    live: 'https://voice-agent.gichogumacharia.tech/',
+  },
   {
     image: whatsappAiAssistant,
     category: 'AI Chatbot & Automation',
@@ -58,6 +82,7 @@ const projects = [
     image: pharmacyChalrose,
     category: 'Full-Stack E-Commerce',
     title: 'Chalrose Pharmacy',
+    brand: 'chalrose',
     description: 'E-commerce platform for a pharmacy featuring a digital storefront, medication catalog, shopping cart, and a sleek, user-friendly responsive dashboard.',
     tech: ['TypeScript', 'Next.js', 'React', 'Tailwind CSS'],
     live: 'https://www.chalrose-pharmaceuticals.co.ke/',
@@ -100,6 +125,7 @@ const projects = [
     image: gigiHygiene,
     category: 'Frontend E-Commerce',
     title: 'Gigi Hygiene',
+    brand: 'gigi',
     description: 'Modern e-commerce storefront for personal care products with product catalog, shopping cart, and performance-optimized responsive UI built with React and Vite.',
     tech: ['React', 'TypeScript', 'Vite', 'Tailwind CSS'],
     live: 'https://gigihygiene.co.ke',
@@ -131,221 +157,103 @@ const projects = [
   },
 ];
 
-type Project = (typeof projects)[number];
-type ProjectLayout = 'grid' | 'showcase';
+type Project = ProjectEntry;
 
-gsap.registerPlugin(ScrollTrigger);
 
-function ProjectCard({ project, index, layout = 'grid' }: { project: Project; index: number; layout?: ProjectLayout }) {
-  const cardRef = useTilt<HTMLElement>({ maxRotation: 12, scale: 1.045 });
+// Keep the two lead tiles, then put the live client work (brand-coloured) first in the next row.
+const ordered: Project[] = [
+  ...projects.slice(0, 2),
+  ...projects.slice(2).filter((p) => p.brand),
+  ...projects.slice(2).filter((p) => !p.brand),
+];
 
-  const card = (
-    <ElectricBorder className="eb-hover-only" color="#e85d04" speed={0.8} chaos={0.1} borderRadius={20}>
-      <article
-        ref={cardRef}
-        className={`project-card glass-card ${project.featured ? 'featured' : ''} ${layout === 'showcase' ? 'project-card-showcase' : ''}`}
-        data-cursor-label="View"
-      >
-        <motion.div
-          className="project-image"
-          initial={layout === 'grid' ? { clipPath: 'inset(0 0 100% 0 round 20px)', opacity: 0.35 } : false}
-          whileInView={layout === 'grid' ? { clipPath: 'inset(0 0 0% 0 round 20px)', opacity: 1 } : undefined}
-          viewport={layout === 'grid' ? { once: true, margin: '-10% 0px' } : undefined}
-          transition={layout === 'grid' ? { duration: 0.9, ease: [0.22, 1, 0.36, 1], delay: 0.08 } : undefined}
-        >
-          <motion.img
-            src={project.image}
-            alt={project.title}
-            className="project-img"
-            loading="lazy"
-            decoding="async"
-            width="600"
-            height="360"
-          />
-          <div className="project-glare" />
-          <div className="project-overlay">
-            {project.live && (
-              <a href={project.live} target="_blank" rel="noopener noreferrer" className="project-link" aria-label="View Live" data-cursor-label="Live">
-                <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
-                  <path d="M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6"/>
-                  <polyline points="15 3 21 3 21 9"/>
-                  <line x1="10" y1="14" x2="21" y2="3"/>
-                </svg>
-              </a>
-            )}
-            <a href={project.github} target="_blank" rel="noopener noreferrer" className="project-link" aria-label="View Code" data-cursor-label="Code">
-              <svg width="24" height="24" viewBox="0 0 24 24" fill="currentColor">
-                <path d="M12 0c-6.626 0-12 5.373-12 12 0 5.302 3.438 9.8 8.207 11.387.599.111.793-.261.793-.577v-2.234c-3.338.726-4.033-1.416-4.033-1.416-.546-1.387-1.333-1.756-1.333-1.756-1.089-.745.083-.729.083-.729 1.205.084 1.839 1.237 1.839 1.237 1.07 1.834 2.807 1.304 3.492.997.107-.775.418-1.305.762-1.604-2.665-.305-5.467-1.334-5.467-5.931 0-1.311.469-2.381 1.236-3.221-.124-.303-.535-1.524.117-3.176 0 0 1.008-.322 3.301 1.23.957-.266 1.983-.399 3.003-.404 1.02.005 2.047.138 3.006.404 2.291-1.552 3.297-1.23 3.297-1.23.653 1.653.242 2.874.118 3.176.77.84 1.235 1.911 1.235 3.221 0 4.609-2.807 5.624-5.479 5.921.43.372.823 1.102.823 2.222v3.293c0 .319.192.694.801.576 4.765-1.589 8.199-6.086 8.199-11.386 0-6.627-5.373-12-12-12z"/>
-              </svg>
-            </a>
-          </div>
-        </motion.div>
+gsap.registerPlugin(ScrollTrigger, useGSAP);
 
-        <div className="project-content">
-          <span className="project-category">{project.category}</span>
-          <h3 className="project-title">{project.title}</h3>
-          <p className={`project-description ${layout === 'showcase' ? 'project-description-showcase' : ''}`}>{project.description}</p>
-          <div className="project-tech">
-            {project.tech.map((tech, techIndex) => (
-              <span key={techIndex}>{tech}</span>
-            ))}
-          </div>
-        </div>
-      </article>
-    </ElectricBorder>
-  );
-
-  if (layout === 'showcase') {
-    return <div className="project-showcase-panel">{card}</div>;
+// 6-column bento. Rows alternate halves (2 tiles) and thirds (3 tiles); the tail is
+// resolved so the final row is always full — no orphan tile.
+function buildSpans(n: number): ('half' | 'third')[] {
+  const out: ('half' | 'third')[] = [];
+  let left = n;
+  let useHalves = true;
+  while (left > 0) {
+    if (left === 1) { out.push('half'); break; }
+    if (left === 4) { out.push('half', 'half', 'half', 'half'); break; }
+    const size = left === 2 ? 2 : left === 3 ? 3 : useHalves ? 2 : 3;
+    for (let i = 0; i < size; i++) out.push(size === 2 ? 'half' : 'third');
+    left -= size;
+    useHalves = !useHalves;
   }
+  return out;
+}
 
+const SPANS = buildSpans(projects.length);
+
+function ProjectTile({ project, index }: { project: Project; index: number }) {
+  const span = SPANS[index] ?? 'third';
+  const primary = project.live ?? project.github;
   return (
-    <ScrollReveal delay={index * 100} direction="up">
-      {card}
-    </ScrollReveal>
+    <article className={`bento-tile glass-card bento-${span}${project.brand ? ` bento-brand brand-${project.brand}` : ''}`} data-cursor-label="View">
+      <div className="bento-top">
+        <span className="bento-tag">{project.brand ? <><i className="bento-live" />Client · live</> : <>{String(index + 1).padStart(2, '0')} · {project.category}</>}</span>
+        <a href={primary} target="_blank" rel="noopener noreferrer" className="bento-arrow" aria-label={`Open ${project.title}`}>
+          <ArrowUpRight size={20} aria-hidden="true" />
+        </a>
+      </div>
+      <h3 className="bento-title">{project.title}</h3>
+      <p className="bento-desc">{project.description}</p>
+      <div className="bento-media">
+        <img src={project.image} alt={`${project.title} screenshot`} loading="lazy" decoding="async" width="600" height="360" />
+      </div>
+      <div className="bento-foot">
+        <div className="bento-tech">{project.tech.slice(0, span === 'third' ? 2 : 4).map((t) => <span key={t}>{t}</span>)}</div>
+        <div className="bento-links">
+          {project.live && <a href={project.live} target="_blank" rel="noopener noreferrer">Live <ArrowUpRight size={14} aria-hidden="true" /></a>}
+          {project.github && <a href={project.github} target="_blank" rel="noopener noreferrer"><Github size={14} aria-hidden="true" /> Code</a>}
+        </div>
+      </div>
+    </article>
   );
 }
 
 const Projects = () => {
-  const sectionRef = useRef<HTMLElement>(null);
-  const showcaseRef = useRef<HTMLDivElement>(null);
-  const trackRef = useRef<HTMLDivElement>(null);
-  const [showPinnedShowcase, setShowPinnedShowcase] = useState(false);
+  const root = useRef<HTMLElement>(null);
 
-  useEffect(() => {
-    if (typeof window === 'undefined') {
-      return;
-    }
-
-    const desktopQuery = window.matchMedia('(min-width: 1024px)');
-    const pointerQuery = window.matchMedia('(pointer: fine)');
-    const motionQuery = window.matchMedia('(prefers-reduced-motion: reduce)');
-
-    const syncMode = () => {
-      setShowPinnedShowcase(desktopQuery.matches && pointerQuery.matches && !motionQuery.matches);
-    };
-
-    syncMode();
-    desktopQuery.addEventListener('change', syncMode);
-    pointerQuery.addEventListener('change', syncMode);
-    motionQuery.addEventListener('change', syncMode);
-
-    return () => {
-      desktopQuery.removeEventListener('change', syncMode);
-      pointerQuery.removeEventListener('change', syncMode);
-      motionQuery.removeEventListener('change', syncMode);
-    };
-  }, []);
-
-  useEffect(() => {
-    if (!showPinnedShowcase || !sectionRef.current || !showcaseRef.current || !trackRef.current) {
-      return;
-    }
-
-    const ctx = gsap.context(() => {
-      const showcase = showcaseRef.current;
-      const track = trackRef.current;
-
-      if (!showcase || !track) {
-        return;
-      }
-
-      const tween = gsap.to(track, {
-        x: () => {
-          const overflow = Math.max(0, track.scrollWidth - showcase.clientWidth);
-          return -overflow;
-        },
-        ease: 'none',
-        scrollTrigger: {
-          trigger: '.projects-showcase-wrapper',
-          start: 'top 5.5rem',
-          end: () => {
-            const overflow = Math.max(0, track.scrollWidth - showcase.clientWidth);
-            return `+=${overflow}`;
-          },
-          pin: true,
-          scrub: 1,
-          invalidateOnRefresh: true,
-        },
+  useGSAP(() => {
+    const mm = gsap.matchMedia();
+    mm.add('(prefers-reduced-motion: no-preference)', () => {
+      gsap.utils.toArray<HTMLElement>('.bento-tile').forEach((tile) => {
+        gsap.from(tile, {
+          y: 48, opacity: 0, duration: 0.9, ease: 'expo.out',
+          scrollTrigger: { trigger: tile, start: 'top 88%', once: true },
+        });
+        const img = tile.querySelector('.bento-media img');
+        if (img) {
+          gsap.fromTo(img, { yPercent: -6, scale: 1.12 }, {
+            yPercent: 6, ease: 'none',
+            scrollTrigger: { trigger: tile, start: 'top bottom', end: 'bottom top', scrub: true },
+          });
+        }
       });
-
-      return () => {
-        tween.scrollTrigger?.kill();
-        tween.kill();
-      };
-    }, sectionRef);
-
-    ScrollTrigger.refresh();
-    return () => ctx.revert();
-  }, [showPinnedShowcase]);
-
-  useEffect(() => {
-    if (!showPinnedShowcase) return;
-
-    // Refresh ScrollTrigger when images load to recalculate the track layout dimensions
-    const track = trackRef.current;
-    if (!track) return;
-
-    const images = track.querySelectorAll('img');
-    if (!images.length) return;
-
-    let loadedCount = 0;
-    const handleImageLoad = () => {
-      loadedCount++;
-      if (loadedCount === images.length) {
-        ScrollTrigger.refresh();
-      }
-    };
-
-    images.forEach((img) => {
-      if (img.complete) {
-        handleImageLoad();
-      } else {
-        img.addEventListener('load', handleImageLoad);
-        img.addEventListener('error', handleImageLoad);
-      }
     });
-
-    return () => {
-      images.forEach((img) => {
-        img.removeEventListener('load', handleImageLoad);
-        img.removeEventListener('error', handleImageLoad);
-      });
-    };
-  }, [showPinnedShowcase]);
+    return () => mm.revert();
+  }, { scope: root });
 
   return (
-    <section ref={sectionRef} className="projects section" id="projects">
+    <section ref={root} className="projects section nx-alt" id="projects">
       <div className="container">
         <ScrollReveal>
-          <div className="section-header">
-            <span className="section-tag">Portfolio</span>
-            <SplitHeading className="section-title" text="Recent Projects" />
+          <div className="nx-head">
+            <div>
+              <SplitHeading className="section-title" text="Selected work" />
+            </div>
+            <a href="https://github.com/Mr-Macharia" target="_blank" rel="noopener noreferrer" className="btn btn-secondary">
+              All repositories <ArrowUpRight size={18} aria-hidden="true" />
+            </a>
           </div>
         </ScrollReveal>
-
-        {showPinnedShowcase ? (
-          <div className="projects-showcase-wrapper">
-            <div className="projects-showcase-intro glass-card">
-              <span className="projects-showcase-kicker">Curated Work</span>
-              <p className="projects-showcase-copy">
-                Scroll through selected builds spanning AI agents, computer vision, automation, analytics, and modern web delivery.
-              </p>
-              <span className="projects-showcase-hint">Scroll sideways through the work</span>
-            </div>
-            <div ref={showcaseRef} className="projects-showcase">
-              <div ref={trackRef} className="projects-showcase-track">
-                {projects.map((project, index) => <ProjectCard key={`${project.title}-showcase`} project={project} index={index} layout="showcase" />)}
-              </div>
-            </div>
-          </div>
-        ) : null}
-
-        {!showPinnedShowcase && (
-          <div className="projects-grid">
-            {projects.map((project, index) => <ProjectCard key={project.title} project={project} index={index} />)}
-          </div>
-        )}
+        <div className="bento-grid">
+          {ordered.map((p, i) => <ProjectTile key={p.title} project={p} index={i} />)}
+        </div>
       </div>
     </section>
   );

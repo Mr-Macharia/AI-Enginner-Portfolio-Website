@@ -3,7 +3,7 @@ import { motion, AnimatePresence } from 'framer-motion';
 import { Sun, Moon, X } from 'lucide-react';
 import { useTheme } from '../context/ThemeContext';
 import { getLenis, scrollToTarget } from '../lib/smoothScroll';
-import webLogo from '../assets/weblogo.webp';
+import webLogo from '../assets/nexus-logo.webp';
 
 interface NavbarProps {
   activeSection: string;
@@ -60,7 +60,7 @@ const Navbar = ({ activeSection }: NavbarProps) => {
         <div className="nav-container">
           {/* Logo */}
           <a href="#home" className="nav-logo" onClick={(event) => handleNavClick(event, '#home')}>
-            <img src={webLogo} alt="GM Logo" className="logo-img" width="36" height="36" decoding="async" fetchPriority="high" />
+            <img src={webLogo} alt="Gich AI Nexus" className="logo-img" width="100" height="36" decoding="async" fetchPriority="high" />
           </a>
 
           {/* Desktop nav links with animated active pill */}

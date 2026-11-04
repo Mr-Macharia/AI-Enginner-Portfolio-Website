@@ -1,6 +1,5 @@
-import { motion } from 'framer-motion';
+import { ArrowUpRight } from 'lucide-react';
 import { scrollToTarget } from '../lib/smoothScroll';
-import webLogo         from '../assets/weblogo.webp';
 import pythonLogo      from '../assets/python_footer.svg';
 import langchainLogo   from '../assets/langchain_footer.svg';
 import crewaiLogo      from '../assets/crewai_footer.svg';
@@ -49,7 +48,7 @@ const Footer = () => {
   };
 
   return (
-    <footer className="footer">
+    <footer className="footer nx-footer-root">
       {/* ── Tech Stack Logo Strip ── */}
       <div className="techstack-strip">
         <p className="strip-label">My Tech Stack</p>
@@ -63,28 +62,23 @@ const Footer = () => {
         </div>
       </div>
 
-      <div className="container">
-        <motion.div
-          className="footer-content"
-          initial={{ opacity: 0, y: 30 }}
-          whileInView={{ opacity: 1, y: 0 }}
-          viewport={{ once: true, margin: '-60px' }}
-          transition={{ duration: 0.55, ease: [0.25, 0.1, 0.25, 1] as [number, number, number, number] }}
-        >
-          <div className="footer-brand">
-            <a href="#home" className="nav-logo" onClick={(event) => handleFooterJump(event, '#home')}>
-              <img src={webLogo} alt="GM Logo" className="logo-img" loading="lazy" decoding="async" />
-            </a>
-            <p>AI/ML Engineer &amp; Data Scientist building intelligent systems in Nairobi, Kenya 🇰🇪</p>
+      <div className="container nx-footer">
+        <div className="nx-footer-grid">
+          <div>
+            <p className="nx-footer-cta">Have a process that eats your team's time?<br /><span className="accent-text">Let's automate it.</span></p>
+            <a href="#contact" className="nx-footer-link" onClick={(event) => handleFooterJump(event, '#contact')}>Start a conversation <ArrowUpRight size={18} aria-hidden="true" /></a>
           </div>
-          <div className="footer-links">
-            <a href="#home" onClick={(event) => handleFooterJump(event, '#home')}>Home</a>
-            <a href="#about" onClick={(event) => handleFooterJump(event, '#about')}>About</a>
-            <a href="#skills" onClick={(event) => handleFooterJump(event, '#skills')}>Skills</a>
-            <a href="#projects" onClick={(event) => handleFooterJump(event, '#projects')}>Projects</a>
-            <a href="#contact" onClick={(event) => handleFooterJump(event, '#contact')}>Contact</a>
+          <div>
+            <h3 className="nx-footer-h">Explore</h3>
+            <ul className="nx-footer-list">
+              {['home', 'about', 'skills', 'projects', 'experience', 'contact'].map((id) => (
+                <li key={id}><a href={`#${id}`} onClick={(event) => handleFooterJump(event, `#${id}`)}>{id[0].toUpperCase() + id.slice(1)}</a></li>
+              ))}
+            </ul>
           </div>
-          <div className="footer-socials">
+          <div>
+            <h3 className="nx-footer-h">Elsewhere</h3>
+            <div className="footer-socials">
             <a href="https://linkedin.com/in/gichogu-macharia" target="_blank" rel="noopener noreferrer" aria-label="LinkedIn">
               <svg width="20" height="20" viewBox="0 0 24 24" fill="currentColor">
                 <path d="M20.447 20.452h-3.554v-5.569c0-1.328-.027-3.037-1.852-3.037-1.853 0-2.136 1.445-2.136 2.939v5.667H9.351V9h3.414v1.561h.046c.477-.9 1.637-1.85 3.37-1.85 3.601 0 4.267 2.37 4.267 5.455v6.286zM5.337 7.433c-1.144 0-2.063-.926-2.063-2.065 0-1.138.92-2.063 2.063-2.063 1.14 0 2.064.925 2.064 2.063 0 1.139-.925 2.065-2.064 2.065zm1.782 13.019H3.555V9h3.564v11.452zM22.225 0H1.771C.792 0 0 .774 0 1.729v20.542C0 23.227.792 24 1.771 24h20.451C23.2 24 24 23.227 24 22.271V1.729C24 .774 23.2 0 22.222 0h.003z"/>
@@ -107,9 +101,13 @@ const Footer = () => {
               </svg>
             </a>
           </div>
-        </motion.div>
-        <div className="footer-bottom">
-          <p>&copy; {currentYear} Gichogu Macharia. All rights reserved.</p>
+            <p className="nx-footer-loc">Nairobi, Kenya</p>
+          </div>
+        </div>
+        <p aria-hidden="true" className="nx-wordmark">Gichogu<span className="accent-text">.</span>AI</p>
+        <div className="nx-footer-bottom">
+          <span className="nx-status"><i />Available for new projects</span>
+          <span>&copy; {currentYear} Gichogu Macharia</span>
         </div>
       </div>
     </footer>

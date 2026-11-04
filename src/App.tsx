@@ -12,7 +12,6 @@ import { destroySmoothScroll, initSmoothScroll } from './lib/smoothScroll';
 
 // Desktop-only pointer effect: keep it (and its GSAP dependency) off the
 // critical path so touch devices never download it.
-const CustomCursor = lazy(() => import('./components/CustomCursor'));
 
 const Projects = lazy(() => import('./components/Projects'));
 const Experience = lazy(() => import('./components/Experience'));
@@ -39,17 +38,8 @@ function SectionFallback({ id, tag, title }: { id: string; tag: string; title: s
 
 function App() {
   const [activeSection, setActiveSection] = useState('home');
-  const [canHover, setCanHover] = useState(false);
   const progressRef = useRef<HTMLDivElement>(null);
   const sectionOffsetsRef = useRef<{ id: string; top: number }[]>([]);
-
-  useEffect(() => {
-    const pointerQuery = window.matchMedia('(pointer: fine)');
-    const sync = () => setCanHover(pointerQuery.matches);
-    sync();
-    pointerQuery.addEventListener('change', sync);
-    return () => pointerQuery.removeEventListener('change', sync);
-  }, []);
 
   useEffect(() => {
     const cacheSectionOffsets = () => {
@@ -134,11 +124,6 @@ function App() {
       <div ref={progressRef} className="scroll-progress is-ready" />
       <Background />
       <GrainOverlay />
-      {canHover && (
-        <Suspense fallback={null}>
-          <CustomCursor />
-        </Suspense>
-      )}
       <div className="app-shell is-ready">
         <Navbar activeSection={activeSection} />
         <main>
