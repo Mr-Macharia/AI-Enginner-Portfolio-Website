@@ -1,5 +1,5 @@
 import { ArrowUpRight } from 'lucide-react';
-import nexusWhite from '../assets/nexus-logo-light.webp';
+import nexusWhite from '../assets/nexus-logo-footer.webp';
 import { scrollToTarget } from '../lib/smoothScroll';
 import pythonLogo      from '../assets/python_footer.svg';
 import langchainLogo   from '../assets/langchain_footer.svg';
@@ -56,7 +56,7 @@ const Footer = () => {
         <div className="logo-track">
           {track.map((item, idx) => (
             <div className="logo-item" key={idx}>
-              <img src={item.src} alt={item.label} loading="lazy" decoding="async" />
+              <img src={item.src} alt={item.label} width="44" height="44" loading="lazy" decoding="async" />
               <span className="logo-badge">{item.label}</span>
             </div>
           ))}

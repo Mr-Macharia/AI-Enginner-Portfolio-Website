@@ -1,20 +1,27 @@
-import VelocityMarquee from './components/nx/VelocityMarquee';
 import { useEffect, useRef, useState, type ComponentType } from 'react';
 import './index.css';
 import Background from './components/Background';
 import Navbar from './components/Navbar';
 import Hero from './components/Hero';
-import About from './components/About';
-import Skills from './components/Skills';
-import Footer from './components/Footer';
 import BackToTop from './components/BackToTop';
 import GrainOverlay from './components/GrainOverlay';
 import { ScrollTrigger } from 'gsap/ScrollTrigger';
 import { destroySmoothScroll, initSmoothScroll } from './lib/smoothScroll';
 
-// Below-the-fold sections load behind the startup loader and mount together, so
+const MARQUEE_ROWS: [string[], string[]] = [
+  ['AI Agents', 'RAG Systems', 'MLOps', 'Automation'],
+  ['Data Science', 'Computer Vision', 'Full-Stack', 'GenAI'],
+];
+
+// Everything below the hero stays out of the first render, so the hero paints as
+// soon as possible. It loads behind the startup loader and mounts together, so
 // the page is revealed once, complete, with its final fonts and layout.
-const sectionLoaders = [
+const sectionLoaders: (() => Promise<{ default: ComponentType }>)[] = [
+  () => import('./components/About'),
+  () => import('./components/Skills'),
+  () => import('./components/nx/VelocityMarquee').then(({ default: Marquee }) => ({
+    default: () => <Marquee rows={MARQUEE_ROWS} />,
+  })),
   () => import('./components/Projects'),
   () => import('./components/Experience'),
   () => import('./components/Certifications'),
@@ -36,15 +43,18 @@ function loadFonts() {
 function App() {
   const [activeSection, setActiveSection] = useState('home');
   const [sections, setSections] = useState<ComponentType[] | null>(null);
+  const [footer, setFooter] = useState<ComponentType | null>(null);
   const [isReady, setIsReady] = useState(false);
   const progressRef = useRef<HTMLDivElement>(null);
   const sectionOffsetsRef = useRef<{ id: string; top: number }[]>([]);
 
   useEffect(() => {
     const modules = Promise.allSettled(sectionLoaders.map((load) => load()));
-    Promise.all([modules, loadFonts()]).then(([results]) => {
+    const footerModule = import('./components/Footer');
+    Promise.all([modules, footerModule.catch(() => null), loadFonts()]).then(([results, footerResult]) => {
       // Already-loaded modules, not lazy(): they commit in this render, so the
       // loader can never lift before they exist. A failed chunk doesn't block the rest.
+      if (footerResult) setFooter(() => footerResult.default);
       setSections(results.flatMap((result) => (result.status === 'fulfilled' ? [result.value.default] : [])));
     });
   }, []);
@@ -162,6 +172,8 @@ function App() {
     };
   }, []);
 
+  const FooterSection = footer;
+
   return (
     <>
       <div ref={progressRef} className="scroll-progress is-ready" />
@@ -171,12 +183,9 @@ function App() {
         <Navbar activeSection={activeSection} />
         <main>
           <Hero isReady={isReady} />
-          <About />
-          <Skills />
-          <VelocityMarquee rows={[['AI Agents', 'RAG Systems', 'MLOps', 'Automation'], ['Data Science', 'Computer Vision', 'Full-Stack', 'GenAI']]} />
           {sections?.map((Section, index) => <Section key={index} />)}
         </main>
-        <Footer />
+        {FooterSection && <FooterSection />}
         <BackToTop />
       </div>
     </>

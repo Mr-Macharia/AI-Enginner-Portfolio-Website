@@ -117,7 +117,7 @@ const Certifications = () => {
       const step = card ? card.offsetWidth + parseFloat(getComputedStyle(el).columnGap || '0') : 1;
       setPos(Math.min(visible.length, Math.round(el.scrollLeft / step) + 1));
     };
-    update();
+    // No initial measure: the deck starts at the first card, and resets fire a scroll event.
     el.addEventListener('scroll', update, { passive: true });
     return () => el.removeEventListener('scroll', update);
   }, [visible.length, loop]);
