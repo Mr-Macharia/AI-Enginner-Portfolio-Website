@@ -115,10 +115,6 @@ body {
   -moz-osx-font-smoothing: grayscale;
 }
 
-body:has(.preloader-root) {
-  overflow: hidden;
-}
-
 body.cursor-none,
 body.cursor-none a,
 body.cursor-none button,
@@ -248,7 +244,6 @@ ul {
 
 .split-heading-word {
   display: inline-block;
-  will-change: transform, opacity;
 }
 
 .split-heading-space {
@@ -538,7 +533,9 @@ ul {
   z-index: 9999;
   transform-origin: left center;
   box-shadow: 0 0 8px rgba(232, 93, 4, 0.6);
-  will-change: width;
+  width: 100%;
+  transform: scaleX(0);
+  will-change: transform;
 }
 
 .app-shell {
@@ -3137,7 +3134,7 @@ section[data-bp]::after {
 .wk-head > div:first-child { display: flex; flex-direction: column; gap: 1.25rem; align-items: flex-start; }
 .wk-title { font-family: var(--font-large); font-weight: 800; letter-spacing: -.055em; line-height: .88; font-size: clamp(3.5rem, 11vw, 10rem); color: #fff; }
 .wk-title-mask { display: block; overflow: hidden; padding-bottom: .06em; }
-.wk-title-line { display: block; will-change: transform; }
+.wk-title-line { display: block; }
 .wk-title em { font-style: normal; background: var(--accent-gradient); -webkit-background-clip: text; background-clip: text; color: transparent; }
 .wk-head-side { display: grid; gap: 1.25rem; justify-items: start; max-width: 26rem; }
 .wk-head-side p { color: var(--text-secondary); line-height: 1.65; }
@@ -3332,7 +3329,7 @@ section[data-bp]::after {
 .fx-glow { position: absolute; left: 50%; bottom: -55%; width: 120%; aspect-ratio: 2; transform: translateX(-50%); background: radial-gradient(ellipse at center, rgba(232, 93, 4, .32), transparent 60%); pointer-events: none; z-index: 0; }
 .fx-title { margin: 1.25rem 0 clamp(2.5rem, 6vw, 4.5rem); font-family: var(--font-large); font-weight: 800; letter-spacing: -.06em; line-height: .86; font-size: clamp(3.5rem, 12.5vw, 12.5rem); color: #fff; }
 .fx-mask { display: block; overflow: hidden; padding-bottom: .07em; }
-.fx-line { display: block; transform-origin: left bottom; will-change: transform; white-space: nowrap; }
+.fx-line { display: block; transform-origin: left bottom; white-space: nowrap; }
 .fx-title em { font-style: normal; -webkit-text-stroke: 2px #fff; color: transparent; }
 .fx-grid { display: grid; gap: clamp(2rem, 4vw, 4rem); align-items: start; }
 @media (min-width: 1024px) { .fx-grid { grid-template-columns: 1fr 1.25fr; } }
@@ -3436,10 +3433,10 @@ section[data-bp]::after {
   font-size: clamp(3.6rem, 12.6vw, 13rem); line-height: .82; letter-spacing: -.065em; color: var(--text-primary);
 }
 .hx-greet { font-family: var(--font-main); font-weight: 500; font-size: clamp(1rem, 1.4vw, 1.25rem); letter-spacing: 0; line-height: 1; color: var(--text-secondary); margin-bottom: clamp(.75rem, 2vh, 1.25rem); }
-.hx-name-1, .hx-name-2 { display: block; white-space: nowrap; will-change: transform; }
+.hx-name-1, .hx-name-2 { display: block; white-space: nowrap; }
 .hx-name-2 { color: var(--accent-primary); padding-left: clamp(1.5rem, 11vw, 13rem); }
 .hx-char-mask { display: inline-block; overflow: hidden; padding-bottom: .09em; margin-bottom: -.09em; vertical-align: top; }
-.hx-char { display: inline-block; will-change: transform; }
+.hx-char { display: inline-block; }
 
 .hx-grid { display: grid; gap: 2.5rem; align-items: start; }
 @media (min-width: 1024px) { .hx-grid { grid-template-columns: minmax(0, .95fr) minmax(0, 1.05fr); gap: clamp(2.5rem, 5vw, 5rem); } }
@@ -3512,7 +3509,7 @@ section[data-bp]::after {
 .hx-scroll { display: inline-flex; align-items: center; gap: .6rem; }
 .hx-scroll i { position: relative; width: 1px; height: 28px; background: var(--line); overflow: hidden; }
 .hx-scroll i::after { content: ""; position: absolute; left: 0; top: -40%; width: 1px; height: 40%; background: var(--accent-primary); animation: hx-drip 1.8s var(--ease-out-expo) infinite; }
-@keyframes hx-drip { to { top: 100%; } }
+@keyframes hx-drip { to { transform: translateY(350%); } }
 @media (max-width: 639px) { .hx-ticker-label { display: none; } .hx-ticker { grid-template-columns: minmax(0, 1fr) auto; margin-inline: 1rem; } .hx-meta { display: none; } }
 @media (prefers-reduced-motion: reduce) { .hx-cursor, .hx-caret, .hx-badge, .hx-scroll i::after { animation: none; } }
 
@@ -3999,3 +3996,29 @@ section[data-bp]::after { top: .7rem; }
 .nx-footer-loc { margin-top: .75rem; }
 .nx-footer-bottom { padding: 1.1rem 0; }
 .nx-footer-root .techstack-strip { padding-block: 1.5rem; }
+
+/* ===================================
+   Phone performance budget
+   Full-screen blends, blurs and backdrop sampling are the costliest things a
+   phone GPU composites, and they are barely visible at this size.
+   =================================== */
+@media (max-width: 768px), (hover: none) {
+  .grain-overlay, .cursor-glow { display: none; }
+
+  /* The soft glow, painted as a static gradient instead of a blurred layer. */
+  .gradient-orb {
+    filter: none;
+    animation: none;
+    will-change: auto;
+    background: radial-gradient(circle closest-side, var(--accent-primary), transparent);
+  }
+
+  *, *::before, *::after {
+    -webkit-backdrop-filter: none !important;
+    backdrop-filter: none !important;
+  }
+
+  .nv.is-scrolled .nv-bar { background: rgba(255, 255, 255, .94); }
+  .dark .nv.is-scrolled .nv-bar,
+  .nv.is-dark.is-scrolled .nv-bar { background: rgba(10, 15, 30, .94); }
+}

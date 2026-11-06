@@ -212,6 +212,14 @@ const SOCIALS = [
 const Hero = ({ isReady }: { isReady: boolean }) => {
   const root = useRef<HTMLElement>(null);
   const [typing, setTyping] = useState(false);
+  const [heroVisible, setHeroVisible] = useState(true);
+
+  // The typewriter re-renders every few milliseconds, so stop it once it's off-screen.
+  useEffect(() => {
+    const io = new IntersectionObserver(([entry]) => setHeroVisible(entry.isIntersecting));
+    if (root.current) io.observe(root.current);
+    return () => io.disconnect();
+  }, []);
 
   useGSAP(() => {
     if (!isReady) return;
@@ -227,7 +235,9 @@ const Hero = ({ isReady }: { isReady: boolean }) => {
         .from('.hx-copy > *', { y: 24, opacity: 0, duration: 0.9, stagger: 0.07 }, 0.55)
         .from('.hx-ticker', { opacity: 0, duration: 1 }, 1);
 
-      // Scroll: the name lines drift apart; the editor floats up.
+    });
+    // Scroll: the name lines drift apart; the editor floats up.
+    mm.add('(min-width: 769px) and (prefers-reduced-motion: no-preference)', () => {
       const st = { trigger: root.current, start: 'top top', end: 'bottom top', scrub: true };
       gsap.to('.hx-name-1', { xPercent: -3, ease: 'none', scrollTrigger: st });
       gsap.to('.hx-name-2', { xPercent: 3, ease: 'none', scrollTrigger: st });
@@ -263,7 +273,7 @@ const Hero = ({ isReady }: { isReady: boolean }) => {
           </h1>
             <div className="hx-copy">
               <p className="hx-build">
-                I build <span className="hx-typed"><Typewriter phrases={PHRASES} enabled={typing} /></span><span className="hx-cursor" aria-hidden="true" />
+                I build <span className="hx-typed"><Typewriter phrases={PHRASES} enabled={typing && heroVisible} /></span><span className="hx-cursor" aria-hidden="true" />
               </p>
               <p className="hx-desc">
                 AI Engineer, ML Engineer &amp; Data Scientist based in Nairobi, Kenya. I specialise in

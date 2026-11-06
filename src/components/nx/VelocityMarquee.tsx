@@ -13,17 +13,28 @@ export default function VelocityMarquee({ rows }: { rows: [string[], string[]] }
     if (window.matchMedia('(prefers-reduced-motion: reduce)').matches) return;
     const tracks = gsap.utils.toArray<HTMLElement>('.vm-track');
     const loops = tracks.map((t, i) =>
-      gsap.fromTo(t, { xPercent: i ? -50 : 0 }, { xPercent: i ? 0 : -50, duration: 40, ease: 'none', repeat: -1 }));
+      gsap.fromTo(t, { xPercent: i ? -50 : 0 }, { xPercent: i ? 0 : -50, duration: 40, ease: 'none', repeat: -1, paused: true }));
+    const onToggle = (self: ScrollTrigger) => loops.forEach((l) => (self.isActive ? l.resume() : l.pause()));
+
+    // The velocity boost is a pointer-device flourish: on phones the rows just drift.
+    if (window.matchMedia('(pointer: coarse)').matches) {
+      ScrollTrigger.create({ trigger: root.current, start: 'top bottom', end: 'bottom top', onToggle });
+      return;
+    }
+
     const skew = gsap.quickTo(tracks, 'skewX', { duration: 0.5, ease: 'power3' });
+    let settle: gsap.core.Tween | undefined;
     ScrollTrigger.create({
       trigger: root.current, start: 'top bottom', end: 'bottom top',
-      onToggle: (self) => loops.forEach((l) => (self.isActive ? l.resume() : l.pause())),
+      onToggle,
       onUpdate: (self) => {
         const v = self.getVelocity();
         const boost = 1 + Math.min(Math.abs(v) / 250, 6);
         loops.forEach((l) => gsap.to(l, { timeScale: boost * (v < 0 ? -1 : 1), duration: 0.2, overwrite: true }));
         skew(gsap.utils.clamp(-12, 12, v / -120));
-        gsap.delayedCall(0.25, () => { loops.forEach((l) => gsap.to(l, { timeScale: v < 0 ? -1 : 1, duration: 1 })); skew(0); });
+        // One pending settle, pushed back by each update, rather than a new call per update.
+        settle?.kill();
+        settle = gsap.delayedCall(0.25, () => { loops.forEach((l) => gsap.to(l, { timeScale: v < 0 ? -1 : 1, duration: 1 })); skew(0); });
       },
     });
   }, { scope: root });

@@ -36,6 +36,8 @@ const ElectricBorder = ({
   const isHoveredRef = useRef(false);
   const [hovered, setHovered] = useState(false);
   const [inView, setInView] = useState(false);
+  // Hover-only effect: touch devices never get the canvas, its loop or its glow layers.
+  const [canHover] = useState(() => window.matchMedia('(hover: hover)').matches);
 
   const noise2D = useCallback(
     (x: number, y: number) => {
@@ -105,7 +107,7 @@ const ElectricBorder = ({
   // Viewport Intersection Observer
   useEffect(() => {
     const container = containerRef.current;
-    if (!container || typeof window === 'undefined') return;
+    if (!container || !canHover) return;
 
     const io = new IntersectionObserver(
       (entries) => {
@@ -118,7 +120,7 @@ const ElectricBorder = ({
 
     io.observe(container);
     return () => io.disconnect();
-  }, []);
+  }, [canHover]);
 
   // Main canvas rendering effect
   useEffect(() => {
@@ -247,14 +249,18 @@ const ElectricBorder = ({
       className={`electric-border${className ? ` ${className}` : ''}`}
       style={{ '--electric-border-color': color, borderRadius, ...style } as CSSProperties}
     >
-      <div className="eb-canvas-container">
-        {inView && <canvas ref={canvasRef} className="eb-canvas" />}
-      </div>
-      <div className="eb-layers" style={{ opacity: hovered ? 1 : 0, transition: 'opacity 0.35s ease' }}>
-        <div className="eb-glow-1" />
-        <div className="eb-glow-2" />
-        <div className="eb-background-glow" />
-      </div>
+      {canHover && (
+        <>
+          <div className="eb-canvas-container">
+            {inView && <canvas ref={canvasRef} className="eb-canvas" />}
+          </div>
+          <div className="eb-layers" style={{ opacity: hovered ? 1 : 0, transition: 'opacity 0.35s ease' }}>
+            <div className="eb-glow-1" />
+            <div className="eb-glow-2" />
+            <div className="eb-background-glow" />
+          </div>
+        </>
+      )}
       <div className="eb-content">{children}</div>
     </div>
   );

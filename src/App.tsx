@@ -61,8 +61,17 @@ function App() {
       sectionOffsetsRef.current = offsets;
     };
 
-    cacheSectionOffsets();
-    window.addEventListener('resize', cacheSectionOffsets, { passive: true });
+    // Layout reads are cached here, never taken on scroll. Observing the page
+    // height also catches lazy sections mounting and images settling.
+    const docHeightRef = { current: 0 };
+    const measure = () => {
+      cacheSectionOffsets();
+      docHeightRef.current = document.documentElement.scrollHeight - window.innerHeight;
+    };
+    measure();
+    const pageObserver = new ResizeObserver(measure);
+    pageObserver.observe(document.documentElement);
+    window.addEventListener('resize', measure, { passive: true });
 
     const updateScrollState = (scrollY = window.scrollY) => {
       // Active section tracking using cached static top offsets
@@ -78,15 +87,22 @@ function App() {
 
       // Scroll progress bar
       if (progressRef.current) {
-        const docHeight = document.documentElement.scrollHeight - window.innerHeight;
-        const pct = docHeight > 0 ? (scrollY / docHeight) * 100 : 0;
-        progressRef.current.style.width = `${pct}%`;
+        const docHeight = docHeightRef.current;
+        const progress = docHeight > 0 ? Math.min(scrollY / docHeight, 1) : 0;
+        progressRef.current.style.transform = `scaleX(${progress})`;
       }
     };
 
     // Track scroll natively right away; Lenis (desktop only) is loaded async
     // and takes over once ready, so scrolling works during that gap.
-    const handleScroll = () => updateScrollState(window.scrollY);
+    let scrollFrame = 0;
+    const handleScroll = () => {
+      if (scrollFrame) return;
+      scrollFrame = requestAnimationFrame(() => {
+        scrollFrame = 0;
+        updateScrollState(window.scrollY);
+      });
+    };
     window.addEventListener('scroll', handleScroll, { passive: true });
     updateScrollState(window.scrollY);
 
@@ -115,7 +131,9 @@ function App() {
     return () => {
       cancelled = true;
       window.removeEventListener('scroll', handleScroll);
-      window.removeEventListener('resize', cacheSectionOffsets);
+      cancelAnimationFrame(scrollFrame);
+      pageObserver.disconnect();
+      window.removeEventListener('resize', measure);
       detachLenis?.();
     };
   }, []);

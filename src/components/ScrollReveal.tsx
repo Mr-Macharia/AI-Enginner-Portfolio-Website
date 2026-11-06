@@ -41,19 +41,17 @@ export const ScrollReveal = ({ children, delay = 0, direction = 'up' }: ScrollRe
       // Initialize element styles to prevent flashes before execution
       gsap.set(element, {
         opacity: 0,
-        scale: 0.97,
-        ...(isMobile ? {} : { filter: 'blur(6px)' }),
+        ...(isMobile ? {} : { scale: 0.97, filter: 'blur(6px)' }),
         ...offset,
       });
 
       // Animating to fully revealed state
       gsap.to(element, {
         opacity: 1,
-        scale: 1,
-        ...(isMobile ? {} : { filter: 'blur(0px)' }),
+        ...(isMobile ? {} : { scale: 1, filter: 'blur(0px)' }),
         x: 0,
         y: 0,
-        duration: 0.85,
+        duration: isMobile ? 0.5 : 0.85,
         delay: delay / 1000,
         ease: 'power3.out',
         scrollTrigger: {

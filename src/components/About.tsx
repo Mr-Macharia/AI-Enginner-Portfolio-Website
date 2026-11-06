@@ -43,12 +43,15 @@ const About = () => {
 
   useGSAP(() => {
     const mm = gsap.matchMedia();
-    mm.add('(prefers-reduced-motion: no-preference)', () => {
-      // Manifesto: words light up as you read down the section.
+    // Manifesto: words light up as you read down the section. Desktop only:
+    // scrubbing every word's opacity repaints the paragraph on each scroll tick.
+    mm.add('(min-width: 769px) and (prefers-reduced-motion: no-preference)', () => {
       gsap.fromTo('.ab-word', { opacity: 0.14 }, {
         opacity: 1, ease: 'none', stagger: 0.08,
         scrollTrigger: { trigger: '.ab-manifesto', start: 'top 80%', end: 'bottom 45%', scrub: true },
       });
+    });
+    mm.add('(prefers-reduced-motion: no-preference)', () => {
       gsap.from('.ab-principle', {
         y: 40, opacity: 0, duration: 0.9, ease: 'expo.out', stagger: 0.12,
         scrollTrigger: { trigger: '.ab-principles', start: 'top 85%', once: true },
