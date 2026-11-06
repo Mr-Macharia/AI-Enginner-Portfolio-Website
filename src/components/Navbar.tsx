@@ -1,5 +1,4 @@
-import { useEffect, useId, useRef, useState, type MouseEvent as RMouseEvent } from 'react';
-import { motion, AnimatePresence, useReducedMotion } from 'framer-motion';
+import { useEffect, useId, useRef, useState, type CSSProperties, type MouseEvent as RMouseEvent } from 'react';
 import { ArrowUpRight, Moon, Sun } from 'lucide-react';
 import { useTheme } from '../context/ThemeContext';
 import { getLenis, scrollToTarget } from '../lib/smoothScroll';
@@ -28,11 +27,9 @@ const Navbar = ({ activeSection }: NavbarProps) => {
   const [onDark, setOnDark] = useState(false);
   const [open, setOpen] = useState(false);
   const { theme, toggleTheme } = useTheme();
-  const indicatorId = useId();
   const menuId = useId();
   const toggleRef = useRef<HTMLButtonElement>(null);
   const lastY = useRef(0);
-  const reduce = useReducedMotion();
 
   // Hide on scroll down, reveal on scroll up; compact once past the hero top.
   useEffect(() => {
@@ -101,7 +98,7 @@ const Navbar = ({ activeSection }: NavbarProps) => {
                 <li key={l.id}>
                   <a href={`#${l.id}`} className={`nv-link${active ? ' is-active' : ''}`} aria-current={active ? 'location' : undefined} onClick={(e) => go(e, l.id)}>
                     <span className="nv-n">{pad(i + 1)}</span>{l.label}
-                    {active && <motion.span layoutId={indicatorId} className="nv-indicator" transition={{ type: 'spring', stiffness: 420, damping: 38 }} />}
+                    {active && <span className="nv-indicator" />}
                   </a>
                 </li>
               );
@@ -129,42 +126,30 @@ const Navbar = ({ activeSection }: NavbarProps) => {
         </nav>
       </header>
 
-      <AnimatePresence>
-        {open && (
-          <motion.div
-            id={menuId}
-            className="nv-sheet"
-            role="dialog"
-            aria-modal="true"
-            aria-label="Menu"
-            initial={reduce ? false : { clipPath: 'inset(0 0 100% 0)' }}
-            animate={{ clipPath: 'inset(0 0 0% 0)' }}
-            exit={{ clipPath: 'inset(0 0 100% 0)' }}
-            transition={{ duration: 0.6, ease: [0.16, 1, 0.3, 1] }}
-          >
+      {/* Stays mounted so CSS can animate it out; hidden from focus and AT while closed. */}
+      <div
+        id={menuId}
+        className={`nv-sheet${open ? ' is-open' : ''}`}
+        role="dialog"
+        aria-modal="true"
+        aria-label="Menu"
+      >
             <ul className="nv-sheet-links">
               {links.map((l, i) => (
-                <motion.li
-                  key={l.id}
-                  initial={reduce ? false : { y: 30, opacity: 0 }}
-                  animate={{ y: 0, opacity: 1 }}
-                  transition={{ delay: 0.15 + i * 0.05, duration: 0.6, ease: [0.16, 1, 0.3, 1] }}
-                >
+                <li key={l.id} style={{ '--i': i } as CSSProperties}>
                   <a href={`#${l.id}`} className={activeSection === l.id ? 'is-active' : undefined} onClick={(e) => go(e, l.id)}>
                     <span className="nv-n">{pad(i + 1)}</span>{l.label}
                   </a>
-                </motion.li>
+                </li>
               ))}
             </ul>
             <div className="nv-sheet-foot">
               <a href="https://wa.me/254101656882" target="_blank" rel="noopener noreferrer">WhatsApp ↗</a>
               <a href="https://linkedin.com/in/gichogu-macharia" target="_blank" rel="noopener noreferrer">LinkedIn ↗</a>
               <a href="https://github.com/Mr-Macharia" target="_blank" rel="noopener noreferrer">GitHub ↗</a>
-              <span className="nv-sheet-meta"><span className="ab-pulse" aria-hidden="true" />Nairobi · <NairobiClock /></span>
+              <span className="nv-sheet-meta"><span className="ab-pulse" aria-hidden="true" />Nairobi · {open && <NairobiClock />}</span>
             </div>
-          </motion.div>
-        )}
-      </AnimatePresence>
+      </div>
     </>
   );
 };

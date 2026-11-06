@@ -226,6 +226,12 @@ const Hero = ({ isReady }: { isReady: boolean }) => {
     const mm = gsap.matchMedia();
     mm.add('(prefers-reduced-motion: no-preference)', () => {
       const tl = gsap.timeline({ defaults: { ease: 'expo.out' }, onComplete: () => setTyping(true) });
+      // Phones: the name paints immediately and everything else settles quickly.
+      if (window.matchMedia('(max-width: 768px)').matches) {
+        tl.from('.hx-topline > *, .hx-greet, .hx-copy > *', { y: 12, opacity: 0, duration: 0.4 }, 0)
+          .from('.hx-ide', { opacity: 0, duration: 0.4 }, 0.1);
+        return;
+      }
       tl.from('.hx-topline > *', { y: 16, opacity: 0, duration: 0.8, stagger: 0.06 })
         .from('.hx-char', { yPercent: 115, duration: 1.2, stagger: 0.028 }, 0.1)
         .from('.hx-greet', { y: 20, opacity: 0, duration: 0.8 }, 0.2)

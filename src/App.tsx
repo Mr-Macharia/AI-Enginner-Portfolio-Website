@@ -1,5 +1,5 @@
 import VelocityMarquee from './components/nx/VelocityMarquee';
-import { lazy, Suspense, useEffect, useRef, useState } from 'react';
+import { Fragment, lazy, Suspense, useEffect, useRef, useState } from 'react';
 import './index.css';
 import Background from './components/Background';
 import Navbar from './components/Navbar';
@@ -9,15 +9,27 @@ import Skills from './components/Skills';
 import Footer from './components/Footer';
 import BackToTop from './components/BackToTop';
 import GrainOverlay from './components/GrainOverlay';
+import { ScrollTrigger } from 'gsap/ScrollTrigger';
 import { destroySmoothScroll, initSmoothScroll } from './lib/smoothScroll';
 
-// Desktop-only pointer effect: keep it (and its GSAP dependency) off the
-// critical path so touch devices never download it.
+// Below-the-fold sections, in page order. Each is fetched and mounted in its own
+// idle slot once the hero has painted, top to bottom, so ScrollTrigger measures
+// every section against a settled layout above it.
+const deferredSections = [
+  { id: 'projects', tag: 'Portfolio', title: 'Recent Projects', load: () => import('./components/Projects') },
+  { id: 'experience', tag: 'Career', title: 'Experience', load: () => import('./components/Experience') },
+  { id: 'certifications', tag: 'Verified Skills', title: 'Certifications & Badges', load: () => import('./components/Certifications') },
+  { id: 'contact', tag: 'Get in Touch', title: "Let's Work Together", load: () => import('./components/Contact') },
+].map((section) => ({ ...section, Component: lazy(section.load) }));
 
-const Projects = lazy(() => import('./components/Projects'));
-const Experience = lazy(() => import('./components/Experience'));
-const Certifications = lazy(() => import('./components/Certifications'));
-const Contact = lazy(() => import('./components/Contact'));
+const whenIdle = (callback: () => void) => {
+  if ('requestIdleCallback' in window) {
+    const id = requestIdleCallback(callback, { timeout: 1200 });
+    return () => cancelIdleCallback(id);
+  }
+  const id = setTimeout(callback, 200); // Safari
+  return () => clearTimeout(id);
+};
 
 function SectionFallback({ id, tag, title }: { id: string; tag: string; title: string }) {
   return (
@@ -39,8 +51,19 @@ function SectionFallback({ id, tag, title }: { id: string; tag: string; title: s
 
 function App() {
   const [activeSection, setActiveSection] = useState('home');
+  const [mountedSections, setMountedSections] = useState(0);
   const progressRef = useRef<HTMLDivElement>(null);
   const sectionOffsetsRef = useRef<{ id: string; top: number }[]>([]);
+
+  useEffect(() => {
+    if (mountedSections >= deferredSections.length) {
+      ScrollTrigger.refresh();
+      return;
+    }
+    return whenIdle(() => {
+      deferredSections[mountedSections].load().finally(() => setMountedSections(mountedSections + 1));
+    });
+  }, [mountedSections]);
 
   useEffect(() => {
     const cacheSectionOffsets = () => {
@@ -150,18 +173,12 @@ function App() {
           <About />
           <Skills />
           <VelocityMarquee rows={[['AI Agents', 'RAG Systems', 'MLOps', 'Automation'], ['Data Science', 'Computer Vision', 'Full-Stack', 'GenAI']]} />
-          <Suspense fallback={<SectionFallback id="projects" tag="Portfolio" title="Recent Projects" />}>
-            <Projects />
-          </Suspense>
-          <Suspense fallback={<SectionFallback id="experience" tag="Career" title="Experience" />}>
-            <Experience />
-          </Suspense>
-          <Suspense fallback={<SectionFallback id="certifications" tag="Verified Skills" title="Certifications & Badges" />}>
-            <Certifications />
-          </Suspense>
-          <Suspense fallback={<SectionFallback id="contact" tag="Get in Touch" title="Let's Work Together" />}>
-            <Contact />
-          </Suspense>
+          {deferredSections.map(({ id, tag, title, Component }, index) => {
+            const fallback = <SectionFallback id={id} tag={tag} title={title} />;
+            return index < mountedSections
+              ? <Suspense key={id} fallback={fallback}><Component /></Suspense>
+              : <Fragment key={id}>{fallback}</Fragment>;
+          })}
         </main>
         <Footer />
         <BackToTop />

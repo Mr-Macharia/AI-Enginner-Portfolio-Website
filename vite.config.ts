@@ -28,10 +28,6 @@ export default defineConfig({
             return 'react-vendor';
           }
 
-          if (id.includes('framer-motion') || id.includes('motion-dom')) {
-            return 'motion-vendor';
-          }
-
           // Keep lenis in its own chunk: it is imported dynamically and only
           // fetched on pointer devices, so it must not be bundled with gsap.
           if (id.includes('lenis')) {

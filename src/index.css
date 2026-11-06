@@ -4022,3 +4022,23 @@ section[data-bp]::after { top: .7rem; }
   .dark .nv.is-scrolled .nv-bar,
   .nv.is-dark.is-scrolled .nv-bar { background: rgba(10, 15, 30, .94); }
 }
+
+/* Mobile menu and active-link indicator, animated without a JS motion library. */
+.nv-sheet {
+  visibility: hidden;
+  clip-path: inset(0 0 100% 0);
+  transition: clip-path .6s var(--ease-out-expo), visibility 0s .6s;
+}
+.nv-sheet.is-open { visibility: visible; clip-path: inset(0 0 0% 0); transition-delay: 0s; }
+.nv-sheet-links li { opacity: 0; transform: translateY(30px); }
+.nv-sheet.is-open .nv-sheet-links li {
+  opacity: 1; transform: none;
+  transition: opacity .6s var(--ease-out-expo), transform .6s var(--ease-out-expo);
+  transition-delay: calc(.15s + var(--i) * .05s);
+}
+.nv-indicator { animation: nv-indicator-in .35s var(--ease-out-expo); }
+@keyframes nv-indicator-in { from { transform: scaleX(0); } }
+@media (prefers-reduced-motion: reduce) {
+  .nv-sheet, .nv-sheet.is-open .nv-sheet-links li { transition: none; }
+  .nv-indicator { animation: none; }
+}
