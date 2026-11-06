@@ -139,7 +139,7 @@ const Certifications = () => {
 
   useGSAP(() => {
     const mm = gsap.matchMedia();
-    mm.add('(prefers-reduced-motion: no-preference)', () => {
+    mm.add('(min-width: 769px) and (prefers-reduced-motion: no-preference)', () => {
       gsap.from('.cc-deck', { y: 60, opacity: 0, duration: 1.1, ease: 'expo.out', scrollTrigger: { trigger: '.cc-deck', start: 'top 85%', once: true } });
       gsap.from('.cc-stat', { y: 30, opacity: 0, duration: 0.9, ease: 'expo.out', stagger: 0.08, scrollTrigger: { trigger: '.cc-stats', start: 'top 85%', once: true } });
     });

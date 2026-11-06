@@ -51,7 +51,7 @@ const About = () => {
         scrollTrigger: { trigger: '.ab-manifesto', start: 'top 80%', end: 'bottom 45%', scrub: true },
       });
     });
-    mm.add('(prefers-reduced-motion: no-preference)', () => {
+    mm.add('(min-width: 769px) and (prefers-reduced-motion: no-preference)', () => {
       gsap.from('.ab-principle', {
         y: 40, opacity: 0, duration: 0.9, ease: 'expo.out', stagger: 0.12,
         scrollTrigger: { trigger: '.ab-principles', start: 'top 85%', once: true },

@@ -24,34 +24,30 @@ export const ScrollReveal = ({ children, delay = 0, direction = 'up' }: ScrollRe
     const element = elementRef.current;
     if (!element || typeof window === 'undefined') return;
 
-    if (window.matchMedia('(prefers-reduced-motion: reduce)').matches) {
+    // Phones show content straight away: reveals are the main scroll-time cost there.
+    if (window.matchMedia('(prefers-reduced-motion: reduce), (max-width: 768px)').matches) {
       return;
     }
 
-    const isMobile = window.matchMedia('(max-width: 768px)').matches;
-
-    // Horizontal reveals translate a full-width wrapper sideways, which sticks
-    // out past the viewport until the trigger fires and causes a horizontal
-    // scrollbar on narrow screens. Reveal upward instead on mobile.
-    const resolvedDirection =
-      isMobile && (direction === 'left' || direction === 'right') ? 'up' : direction;
-    const offset = directionOffset[resolvedDirection];
+    const offset = directionOffset[direction];
 
     const ctx = gsap.context(() => {
       // Initialize element styles to prevent flashes before execution
       gsap.set(element, {
         opacity: 0,
-        ...(isMobile ? {} : { scale: 0.97, filter: 'blur(6px)' }),
+        scale: 0.97,
+        filter: 'blur(6px)',
         ...offset,
       });
 
       // Animating to fully revealed state
       gsap.to(element, {
         opacity: 1,
-        ...(isMobile ? {} : { scale: 1, filter: 'blur(0px)' }),
+        scale: 1,
+        filter: 'blur(0px)',
         x: 0,
         y: 0,
-        duration: isMobile ? 0.5 : 0.85,
+        duration: 0.85,
         delay: delay / 1000,
         ease: 'power3.out',
         scrollTrigger: {

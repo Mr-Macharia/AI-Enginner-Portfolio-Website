@@ -9,7 +9,7 @@ gsap.registerPlugin(ScrollTrigger, useGSAP);
 export default function CountUp({ to, suffix = '', prefix = '' }: { to: number; suffix?: string; prefix?: string }) {
   const ref = useRef<HTMLSpanElement>(null);
   useGSAP(() => {
-    if (window.matchMedia('(prefers-reduced-motion: reduce)').matches) return;
+    if (window.matchMedia('(prefers-reduced-motion: reduce), (max-width: 768px)').matches) return;
     const o = { v: 0 };
     gsap.to(o, {
       v: to, duration: 2, ease: 'power3.out',

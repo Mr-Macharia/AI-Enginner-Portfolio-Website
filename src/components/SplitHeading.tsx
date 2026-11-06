@@ -22,7 +22,7 @@ const SplitHeading = ({ as: Tag = 'h2', className, text, delay = 0, once = true 
       return;
     }
 
-    if (window.matchMedia('(prefers-reduced-motion: reduce)').matches) {
+    if (window.matchMedia('(prefers-reduced-motion: reduce), (max-width: 768px)').matches) {
       return;
     }
 

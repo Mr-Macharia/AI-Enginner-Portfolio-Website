@@ -206,7 +206,7 @@ const Contact = () => {
 
   useGSAP(() => {
     const mm = gsap.matchMedia();
-    mm.add('(prefers-reduced-motion: no-preference)', () => {
+    mm.add('(min-width: 769px) and (prefers-reduced-motion: no-preference)', () => {
       gsap.from('.fx-line', {
         yPercent: 115, duration: 1.2, ease: 'expo.out', stagger: 0.1,
         scrollTrigger: { trigger: '.fx-title', start: 'top 85%', once: true },

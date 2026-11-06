@@ -274,9 +274,11 @@ const Projects = () => {
   const mover = useRef<{ x: gsap.QuickToFunc; y: gsap.QuickToFunc } | null>(null);
 
   const [showAll, setShowAll] = useState(false);
+  // Every filter starts collapsed to its first few projects.
+  const selectFilter = (next: 'all' | Group) => { setFilter(next); setShowAll(false); };
   const visible = ordered.filter((p) => filter === 'all' || groupOf(p) === filter);
   // Lead with the strongest work; the rest is one tap away.
-  const PREVIEW = 8;
+  const PREVIEW = 6;
   const listed = showAll ? visible : visible.slice(0, PREVIEW);
   const count = (id: 'all' | Group) => (id === 'all' ? ordered.length : ordered.filter((p) => groupOf(p) === id).length);
 
@@ -286,13 +288,15 @@ const Projects = () => {
       y: gsap.quickTo(preview.current, 'y', { duration: 0.6, ease: 'power3' }),
     };
     const mm = gsap.matchMedia();
-    mm.add('(prefers-reduced-motion: no-preference)', () => {
+    mm.add('(min-width: 769px) and (prefers-reduced-motion: no-preference)', () => {
       gsap.from('.wk-title-line', {
         yPercent: 110, duration: 1.1, ease: 'expo.out', stagger: 0.08,
         scrollTrigger: { trigger: '.wk-head', start: 'top 80%', once: true },
       });
-      gsap.from('.wk-row', {
-        y: 40, opacity: 0, duration: 0.9, ease: 'expo.out', stagger: 0.05,
+      // Explicit end values: from() reads them off the element at setup, and a
+      // row caught mid-transition would otherwise animate to opacity 0 for good.
+      gsap.fromTo('.wk-row', { y: 40, opacity: 0 }, {
+        y: 0, opacity: 1, duration: 0.9, ease: 'expo.out', stagger: 0.05, clearProps: 'opacity,transform',
         scrollTrigger: { trigger: '.wk-list', start: 'top 85%', once: true },
       });
       gsap.from('.wk-rule', {
@@ -308,7 +312,7 @@ const Projects = () => {
   useEffect(() => {
     if (first.current) { first.current = false; return; }
     if (window.matchMedia('(prefers-reduced-motion: reduce)').matches) return;
-    gsap.fromTo('.wk-row', { y: 24, opacity: 0 }, { y: 0, opacity: 1, duration: 0.6, ease: 'expo.out', stagger: 0.04 });
+    gsap.fromTo('.wk-row', { y: 24, opacity: 0 }, { y: 0, opacity: 1, duration: 0.6, ease: 'expo.out', stagger: 0.04, clearProps: 'opacity,transform' });
     ScrollTrigger.refresh();
   }, [filter]);
 
@@ -342,7 +346,7 @@ const Projects = () => {
         <div className="wk-bar">
           <div className="wk-filters" role="group" aria-label="Filter projects">
             {FILTERS.map((f) => (
-              <button key={f.id} type="button" className={`wk-chip${filter === f.id ? ' is-active' : ''}`} aria-pressed={filter === f.id} onClick={() => setFilter(f.id)}>
+              <button key={f.id} type="button" className={`wk-chip${filter === f.id ? ' is-active' : ''}`} aria-pressed={filter === f.id} onClick={() => selectFilter(f.id)}>
                 {f.label}<sup>{pad(count(f.id))}</sup>
               </button>
             ))}
@@ -377,7 +381,7 @@ const Projects = () => {
         </ol>
         {visible.length > PREVIEW && (
           <button type="button" className="wk-more" aria-expanded={showAll} onClick={() => setShowAll((v) => !v)}>
-            {showAll ? 'Show fewer' : `Show all ${visible.length} projects`}
+            {showAll ? 'View less' : `View more (${visible.length - PREVIEW})`}
           </button>
         )}
       </div>

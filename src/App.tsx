@@ -1,5 +1,5 @@
 import VelocityMarquee from './components/nx/VelocityMarquee';
-import { Fragment, lazy, Suspense, useEffect, useRef, useState } from 'react';
+import { useEffect, useRef, useState, type ComponentType } from 'react';
 import './index.css';
 import Background from './components/Background';
 import Navbar from './components/Navbar';
@@ -12,58 +12,59 @@ import GrainOverlay from './components/GrainOverlay';
 import { ScrollTrigger } from 'gsap/ScrollTrigger';
 import { destroySmoothScroll, initSmoothScroll } from './lib/smoothScroll';
 
-// Below-the-fold sections, in page order. Each is fetched and mounted in its own
-// idle slot once the hero has painted, top to bottom, so ScrollTrigger measures
-// every section against a settled layout above it.
-const deferredSections = [
-  { id: 'projects', tag: 'Portfolio', title: 'Recent Projects', load: () => import('./components/Projects') },
-  { id: 'experience', tag: 'Career', title: 'Experience', load: () => import('./components/Experience') },
-  { id: 'certifications', tag: 'Verified Skills', title: 'Certifications & Badges', load: () => import('./components/Certifications') },
-  { id: 'contact', tag: 'Get in Touch', title: "Let's Work Together", load: () => import('./components/Contact') },
-].map((section) => ({ ...section, Component: lazy(section.load) }));
+// Below-the-fold sections load behind the startup loader and mount together, so
+// the page is revealed once, complete, with its final fonts and layout.
+const sectionLoaders = [
+  () => import('./components/Projects'),
+  () => import('./components/Experience'),
+  () => import('./components/Certifications'),
+  () => import('./components/Contact'),
+];
 
-const whenIdle = (callback: () => void) => {
-  if ('requestIdleCallback' in window) {
-    const id = requestIdleCallback(callback, { timeout: 1200 });
-    return () => cancelIdleCallback(id);
-  }
-  const id = setTimeout(callback, 200); // Safari
-  return () => clearTimeout(id);
-};
+const FONT_TIMEOUT_MS = 2500;
 
-function SectionFallback({ id, tag, title }: { id: string; tag: string; title: string }) {
-  return (
-    <section className="section section-fallback" id={id} aria-busy="true" aria-live="polite">
-      <div className="container">
-        <div className="section-header">
-          <span className="section-tag">{tag}</span>
-          <h2 className="section-title">{title}</h2>
-        </div>
-        <div className="section-fallback-card glass-card">
-          <div className="section-fallback-line section-fallback-line-wide" />
-          <div className="section-fallback-line" />
-          <div className="section-fallback-line section-fallback-line-short" />
-        </div>
-      </div>
-    </section>
-  );
+function loadFonts() {
+  const fonts = Promise.all([
+    document.fonts.load('400 1em "Georama Variable"'),
+    document.fonts.load('700 1em "Host Grotesk Variable"'),
+    document.fonts.load('400 1em "Fira Code"'),
+  ]);
+  // A slow font never holds the page hostage; it swaps in when it arrives.
+  return Promise.race([fonts, new Promise((resolve) => setTimeout(resolve, FONT_TIMEOUT_MS))]);
 }
 
 function App() {
   const [activeSection, setActiveSection] = useState('home');
-  const [mountedSections, setMountedSections] = useState(0);
+  const [sections, setSections] = useState<ComponentType[] | null>(null);
+  const [isReady, setIsReady] = useState(false);
   const progressRef = useRef<HTMLDivElement>(null);
   const sectionOffsetsRef = useRef<{ id: string; top: number }[]>([]);
 
   useEffect(() => {
-    if (mountedSections >= deferredSections.length) {
-      ScrollTrigger.refresh();
-      return;
-    }
-    return whenIdle(() => {
-      deferredSections[mountedSections].load().finally(() => setMountedSections(mountedSections + 1));
+    const modules = Promise.allSettled(sectionLoaders.map((load) => load()));
+    Promise.all([modules, loadFonts()]).then(([results]) => {
+      // Already-loaded modules, not lazy(): they commit in this render, so the
+      // loader can never lift before they exist. A failed chunk doesn't block the rest.
+      setSections(results.flatMap((result) => (result.status === 'fulfilled' ? [result.value.default] : [])));
     });
-  }, [mountedSections]);
+  }, []);
+
+  useEffect(() => {
+    if (!sections) return;
+    // Two frames: let the sections paint once before ScrollTrigger measures final layout.
+    let frame = requestAnimationFrame(() => {
+      frame = requestAnimationFrame(() => {
+        ScrollTrigger.refresh();
+        setIsReady(true);
+      });
+    });
+    return () => cancelAnimationFrame(frame);
+  }, [sections]);
+
+  // Runs after Hero's effects, so its intro is armed before the loader lifts.
+  useEffect(() => {
+    if (isReady) document.getElementById('boot')?.classList.add('is-done');
+  }, [isReady]);
 
   useEffect(() => {
     const cacheSectionOffsets = () => {
@@ -169,16 +170,11 @@ function App() {
       <div className="app-shell is-ready">
         <Navbar activeSection={activeSection} />
         <main>
-          <Hero isReady={true} />
+          <Hero isReady={isReady} />
           <About />
           <Skills />
           <VelocityMarquee rows={[['AI Agents', 'RAG Systems', 'MLOps', 'Automation'], ['Data Science', 'Computer Vision', 'Full-Stack', 'GenAI']]} />
-          {deferredSections.map(({ id, tag, title, Component }, index) => {
-            const fallback = <SectionFallback id={id} tag={tag} title={title} />;
-            return index < mountedSections
-              ? <Suspense key={id} fallback={fallback}><Component /></Suspense>
-              : <Fragment key={id}>{fallback}</Fragment>;
-          })}
+          {sections?.map((Section, index) => <Section key={index} />)}
         </main>
         <Footer />
         <BackToTop />

@@ -32,8 +32,8 @@
   --container-padding: 1.5rem;
 
   /* Typography */
-  --font-main: "Georama", -apple-system, BlinkMacSystemFont, sans-serif;
-  --font-large: "Host Grotesk", -apple-system, BlinkMacSystemFont, sans-serif;
+  --font-main: "Georama Variable", -apple-system, BlinkMacSystemFont, sans-serif;
+  --font-large: "Host Grotesk Variable", -apple-system, BlinkMacSystemFont, sans-serif;
   --font-mono: "Fira Code", "Consolas", monospace;
 
   /* Transitions */
